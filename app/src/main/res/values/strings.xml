@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Debian Distro Watch</string>
+    <string name="main_dialog_message">Choose Action</string>
+    <string name="main_dialog_positive">Check Distro</string>
+    <string name="main_dialog_negative">Exit</string>
+    <string name="main_dialog_neutral">Configure</string>
+</resources>
