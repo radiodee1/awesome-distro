@@ -21,25 +21,38 @@ import java.util.zip.GZIPInputStream;
 public class ADDownload {
 
     private String mUrl = "";
+    private String mSearchString = "";
     private Date mDateOld = new Date();
     private Date mDateNew = new Date();
     private ArrayList<String> mList = new ArrayList<>();
+    private ArrayList<ADPackageInfo> mPackageList = new ArrayList<>();
+    private int mListType = 0;
 
-    public static final int ACTION_GZIP_FILE = 1;
-    public static final int ACTION_TEXT_FILE = 2;
+    public static final int ACTION_GZIP_FILE_SHOW_ALL = 1;
+    public static final int ACTION_TEXT_FILE_SHOW_ALL = 2;
+    public static final int ACTION_GZIP_FILE_SHOW_PACKAGE_DEB = 3;
+    public static final int ACTION_GZIP_FILE_SHOW_SECTION_DEB = 4;
+
 
 
     public ADDownload(String url, Date old, int action) {
         mUrl = url;
         mDateOld = old;
+        mListType = action;
         //mList = downloadFile(mUrl);
 
         switch (action) {
-            case ACTION_GZIP_FILE:
+            case ACTION_GZIP_FILE_SHOW_ALL:
                 mList = downloadGzipFile(mUrl);
                 break;
-            case ACTION_TEXT_FILE:
+            case ACTION_TEXT_FILE_SHOW_ALL:
                 mList = downloadFile(mUrl);
+                break;
+            case ACTION_GZIP_FILE_SHOW_PACKAGE_DEB:
+                mList = downloadGzipFile(mUrl);
+                break;
+            case ACTION_GZIP_FILE_SHOW_SECTION_DEB:
+                mList = downloadGzipFile(mUrl);
                 break;
         }
 
@@ -50,6 +63,41 @@ public class ADDownload {
     public void setDateOld(Date date) {mDateOld = date;}
     public Date getDateOld() {return  mDateOld;}
     public ArrayList<String> getList() {return mList;}
+    public void setSearchString(String s) {mSearchString = s;}
+
+    public ArrayList<String> getList(int type) {
+        ArrayList<String> sublist = new ArrayList<>();
+        mListType = type;
+
+
+        switch (mListType) {
+            case ACTION_GZIP_FILE_SHOW_PACKAGE_DEB:
+                fillPackageList();
+
+                for (int i = 0; i < mPackageList.size(); i ++ ) {
+                    if (mPackageList.get(i).packageSection.trim().endsWith(mSearchString.trim())) {
+                        sublist.add(mSearchString + " " + mPackageList.get(i).packageName);
+                        //System.out.println(mSearchString);
+
+                    }
+                }
+                break;
+            case ACTION_GZIP_FILE_SHOW_SECTION_DEB:
+                for (int i = 0; i < mList.size() ; i ++) {
+                    if (mList.get(i).startsWith("Section")) {
+                        String mSection = mList.get(i).substring(("Section:").length());
+                        if (!sublist.contains(mSection)) {
+                            sublist.add(mSection);
+                        }
+                    }
+                }
+                break;
+
+        }
+
+        return sublist;
+    }
+
 
     private ArrayList<String> downloadFile(String url) {
 
@@ -62,7 +110,7 @@ public class ADDownload {
 
             String inputLine;
             while ((inputLine = in.readLine()) != null) {
-                System.out.println(inputLine);
+                //System.out.println(inputLine);
                 list.add(inputLine);
             }
             in.close();
@@ -89,7 +137,8 @@ public class ADDownload {
 
             String readed;
             while ((readed = in.readLine()) != null) {
-                System.out.println(readed);
+                //System.out.println(readed);
+                list.add(readed.trim());
             }
         } catch (MalformedURLException me) {
             System.out.println("MalformedURLException: " + me);
@@ -99,5 +148,31 @@ public class ADDownload {
 
 
         return list;
+    }
+
+    private void fillPackageList() {
+        int i = 0;
+        ADPackageInfo packageInfo = new ADPackageInfo();
+        while ( i < mList.size()) {
+            if (mList.get(i).startsWith("Section:")) {
+                packageInfo.packageSection = mList.get(i).substring("Section: ".length()).trim();
+            }
+            if (mList.get(i).startsWith("Package:")) {
+                packageInfo.packageName = mList.get(i).substring("Package: ".length());
+
+            }
+            if (mList.get(i).startsWith("Version:")) {
+                packageInfo.packageVersion = mList.get(i).substring("Version: ".length());
+            }
+            if (mList.get(i).startsWith("Filename:")) {
+                packageInfo.packageFilename = mList.get(i).substring("Filename: ".length());
+            }
+            if (mList.get(i).isEmpty()) {
+                mPackageList.add(packageInfo);
+                packageInfo = new ADPackageInfo();
+            }
+            i++;
+        }
+        mList = null;
     }
 }

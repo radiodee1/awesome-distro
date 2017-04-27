@@ -4,7 +4,6 @@ import android.app.DialogFragment;
 import android.app.ListActivity;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 
@@ -12,21 +11,23 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-        import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
-        import android.app.ListActivity;
 
-public class ADActivityList extends ListActivity {
+public class ADActivityList extends ListActivity
+        implements ADDialogQuestion.ADDialogQuestionInterface {
 
     private TextView text;
     private List<String> listValues;
     private ArrayAdapter<String> myAdapter;
     private Context mContext;
     private ADDownload download;
+
+    private int mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +47,7 @@ public class ADActivityList extends ListActivity {
             listValues.add("Windows Phone");
         }
         // initiate the listadapter
-        //ArrayAdapter<String>
+
         myAdapter = new ArrayAdapter <String>(this,
                 R.layout.row_layout, R.id.listText, listValues);
 
@@ -60,8 +61,7 @@ public class ADActivityList extends ListActivity {
             @Override
             public void onClick(View v) {
                 showDialog();
-                DownloadFilesTask down = new DownloadFilesTask();
-                down.execute(getDistroURL());
+
             }
         });
 
@@ -73,9 +73,16 @@ public class ADActivityList extends ListActivity {
         super.onListItemClick(list, view, position, id);
 
         String selectedItem = (String) getListView().getItemAtPosition(position);
-        //String selectedItem = (String) getListAdapter().getItem(position);
 
         text.setText("You clicked " + selectedItem + " at position " + position);
+
+        if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB) {
+            mListType = ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB;
+            download.setSearchString(selectedItem);
+
+            listValues = download.getList(mListType);
+            showList();
+        }
     }
 
     public void showDialog() {
@@ -83,8 +90,33 @@ public class ADActivityList extends ListActivity {
         dialog.show(getFragmentManager(), "button_check");
     }
 
+    public void showList() {
+        myAdapter = new ArrayAdapter <String>(mContext,
+                R.layout.row_layout, R.id.listText, listValues);
+        myAdapter.notifyDataSetChanged();
+        myAdapter.setNotifyOnChange(true);
+        setListAdapter(myAdapter);
+    }
+
     public String getDistroURL() {
-        return "http://http.us.debian.org/debian/dists/stable/main/binary-amd64/"  + "Release";
+        return "http://http.us.debian.org/debian/dists/stable/main/binary-amd64/" +"Packages.gz"; //+ "Release";
+    }
+
+    @Override
+    public void onDialogPositiveClick(DialogFragment dialog) {
+        // check distro
+        DownloadFilesTask down = new DownloadFilesTask();
+        down.execute(getDistroURL());
+    }
+
+    @Override
+    public void onDialogNegativeClick(DialogFragment dialog) {
+        // exit
+    }
+
+    @Override
+    public void onDialogNeutralClick(DialogFragment dialog) {
+        // configure
     }
 
     ////////////////////////////////////////
@@ -99,12 +131,12 @@ public class ADActivityList extends ListActivity {
             //System.out.println(params[0]);
             int num = 0;
             if (params[0].endsWith(".gz")) {
-                num = ADDownload.ACTION_GZIP_FILE;
+                mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
             }
             else {
-                num = ADDownload.ACTION_TEXT_FILE;
+                mListType = ADDownload.ACTION_TEXT_FILE_SHOW_ALL;
             }
-            download = new ADDownload(params[0], new Date(), num);
+            download = new ADDownload(params[0], new Date(), mListType);
             //listValues = download.getList();
             return null;
         }
@@ -112,12 +144,8 @@ public class ADActivityList extends ListActivity {
         @Override
         protected void onPostExecute(Void result) {
             //System.out.println(listValues.get(0));
-            listValues = download.getList();
-            myAdapter = new ArrayAdapter <String>(mContext,
-                    R.layout.row_layout, R.id.listText, listValues);
-            myAdapter.notifyDataSetChanged();
-            myAdapter.setNotifyOnChange(true);
-            setListAdapter(myAdapter);
+            listValues = download.getList(mListType);
+            showList();
 
         }
     }

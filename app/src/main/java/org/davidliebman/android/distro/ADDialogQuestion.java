@@ -1,5 +1,6 @@
 package org.davidliebman.android.distro;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
@@ -12,12 +13,27 @@ import android.os.Bundle;
 
 public class ADDialogQuestion extends DialogFragment {
 
-    /*
+    ADDialogQuestionInterface mListener;
+
     public interface ADDialogQuestionInterface {
         public void onDialogPositiveClick(DialogFragment dialog);
         public void onDialogNegativeClick(DialogFragment dialog);
+        public void onDialogNeutralClick(DialogFragment dialog);
     }
-    */
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        // Verify that the host activity implements the callback interface
+        try {
+            // Instantiate the NoticeDialogListener so we can send events to the host
+            mListener = (ADDialogQuestionInterface) activity;
+        } catch (ClassCastException e) {
+            // The activity doesn't implement the interface, throw exception
+            throw new ClassCastException(activity.toString()
+                    + " must implement NoticeDialogListener");
+        }
+    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -26,17 +42,20 @@ public class ADDialogQuestion extends DialogFragment {
         builder.setMessage(R.string.main_dialog_message)
                 .setPositiveButton(R.string.main_dialog_positive, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // FIRE ZE MISSILES!
+                        // check distro
+                        mListener.onDialogPositiveClick(ADDialogQuestion.this);
                     }
                 })
                 .setNegativeButton(R.string.main_dialog_negative, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
+                        // exit
+                        mListener.onDialogNegativeClick(ADDialogQuestion.this);
                     }
                 })
                 .setNeutralButton(R.string.main_dialog_neutral, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // user exit
+                        // configure app
+                        mListener.onDialogNeutralClick(ADDialogQuestion.this);
                     }
                 });
         // Create the AlertDialog object and return it
