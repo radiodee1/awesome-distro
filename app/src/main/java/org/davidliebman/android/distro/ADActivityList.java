@@ -97,7 +97,14 @@ public class ADActivityList extends ListActivity {
         @Override
         protected Void doInBackground(String... params) {
             //System.out.println(params[0]);
-            download = new ADDownload(params[0], new Date());
+            int num = 0;
+            if (params[0].endsWith(".gz")) {
+                num = ADDownload.ACTION_GZIP_FILE;
+            }
+            else {
+                num = ADDownload.ACTION_TEXT_FILE;
+            }
+            download = new ADDownload(params[0], new Date(), num);
             //listValues = download.getList();
             return null;
         }
