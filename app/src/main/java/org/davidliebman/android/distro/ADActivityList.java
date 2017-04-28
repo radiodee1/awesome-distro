@@ -25,6 +25,7 @@ public class ADActivityList extends ListActivity
     private ArrayAdapter<String> myAdapter;
     private Context mContext;
     private ADDownload download;
+    private DownloadFilesTask down;
 
     private int mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
 
@@ -76,12 +77,15 @@ public class ADActivityList extends ListActivity
 
         text.setText("You clicked " + selectedItem + " at position " + position);
 
-        if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB) {
+        if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB && down.getStatus() == AsyncTask.Status.FINISHED) {
+
             mListType = ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB;
             download.setSearchString(selectedItem);
+            down = new DownloadFilesTask();
+            down.execute(getDistroURL());
 
-            listValues = download.getList(mListType);
-            showList();
+            //listValues = download.getList(mListType);
+            //showList();
         }
     }
 
@@ -105,7 +109,8 @@ public class ADActivityList extends ListActivity
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         // check distro
-        DownloadFilesTask down = new DownloadFilesTask();
+        //DownloadFilesTask
+        down = new DownloadFilesTask();
         down.execute(getDistroURL());
     }
 
@@ -131,20 +136,42 @@ public class ADActivityList extends ListActivity
             //System.out.println(params[0]);
             int num = 0;
             if (params[0].endsWith(".gz")) {
-                mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+                //mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
             }
             else {
                 mListType = ADDownload.ACTION_TEXT_FILE_SHOW_ALL;
             }
-            download = new ADDownload(params[0], new Date(), mListType);
-            //listValues = download.getList();
+            //download = new ADDownload(params[0], new Date(), mListType);
+
+            switch (mListType) {
+                case ADDownload.ACTION_TEXT_FILE_SHOW_ALL:
+                    download = new ADDownload(params[0], new Date(), mListType);
+                    listValues = download.getList(mListType);
+
+                    break;
+                case ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB:
+                    listValues = download.getList(mListType);
+
+                    break;
+                case ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB:
+                    download = new ADDownload(params[0], new Date(), mListType);
+                    listValues = download.getList(mListType);
+
+                    break;
+                case ADDownload.ACTION_GZIP_FILE_SHOW_ALL:
+                    download = new ADDownload(params[0], new Date(), mListType);
+                    listValues = download.getList(mListType);
+
+                    break;
+            }
+
             return null;
         }
 
         @Override
         protected void onPostExecute(Void result) {
             //System.out.println(listValues.get(0));
-            listValues = download.getList(mListType);
+            //listValues = download.getList(mListType);
             showList();
 
         }
