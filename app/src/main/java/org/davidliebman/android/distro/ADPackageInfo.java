@@ -12,5 +12,5 @@ public class ADPackageInfo {
     public String packageSection = "";
     public String packageFilename = "";
     public Date   packageDate = new Date();
-
+    public boolean packageIsNew = false;
 }

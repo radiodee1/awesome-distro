@@ -3,6 +3,7 @@ package org.davidliebman.android.distro;
 import android.app.DialogFragment;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -20,6 +21,9 @@ import android.widget.TextView;
 public class ADActivityList extends ListActivity
         implements ADDialogQuestion.ADDialogQuestionInterface {
 
+    private long mDateOld = 0;
+    private long mDateDownload = 0;
+    private long mDateShowing = 0;
     private TextView text;
     private List<String> listValues;
     private ArrayAdapter<String> myAdapter;
@@ -29,6 +33,8 @@ public class ADActivityList extends ListActivity
 
     private int mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
 
+    public static final String PREFERENCES_FILE_KEY = "awesome_distro";
+    public static final String PREFERENCES_DATE_OLD_KEY = "long_old_date";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,6 +62,8 @@ public class ADActivityList extends ListActivity
         setListAdapter(myAdapter);
 
         myAdapter.setNotifyOnChange(true);
+
+        readPreferences();
 
         Button checkButton = (Button) findViewById(R.id.main_button);
         checkButton.setOnClickListener(new View.OnClickListener() {
@@ -100,16 +108,18 @@ public class ADActivityList extends ListActivity
         myAdapter.notifyDataSetChanged();
         myAdapter.setNotifyOnChange(true);
         setListAdapter(myAdapter);
+        mDateShowing = mDateDownload;
     }
 
     public String getDistroURL() {
-        return "http://http.us.debian.org/debian/dists/stable/main/binary-amd64/" +"Packages.gz"; //+ "Release";
+        return "http://http.us.debian.org/debian/dists/testing/main/binary-amd64/" +"Packages.gz"; //+ "Release";
     }
 
     @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         // check distro
         //DownloadFilesTask
+        mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
         down = new DownloadFilesTask();
         down.execute(getDistroURL());
     }
@@ -122,6 +132,23 @@ public class ADActivityList extends ListActivity
     @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
         // configure
+    }
+
+    public void writePreferences() {
+        //Context context = getActivity();
+        SharedPreferences sharedPref = mContext.getSharedPreferences(
+                PREFERENCES_FILE_KEY, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putLong(PREFERENCES_DATE_OLD_KEY, mDateDownload);
+        editor.commit();
+
+    }
+
+    public void readPreferences() {
+        SharedPreferences sharedPref = mContext.getSharedPreferences(
+                PREFERENCES_FILE_KEY, Context.MODE_PRIVATE);
+        mDateOld = sharedPref.getLong(PREFERENCES_DATE_OLD_KEY, 0);
+        System.out.println("date from preferences " + new Date(mDateOld));
     }
 
     ////////////////////////////////////////
@@ -145,23 +172,23 @@ public class ADActivityList extends ListActivity
 
             switch (mListType) {
                 case ADDownload.ACTION_TEXT_FILE_SHOW_ALL:
-                    download = new ADDownload(params[0], new Date(), mListType);
+                    download = new ADDownload(params[0], mDateOld, mListType);
                     listValues = download.getList(mListType);
-
+                    mDateDownload = download.getDateDownload();
                     break;
                 case ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB:
                     listValues = download.getList(mListType);
 
                     break;
                 case ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB:
-                    download = new ADDownload(params[0], new Date(), mListType);
+                    download = new ADDownload(params[0], mDateOld, mListType);
                     listValues = download.getList(mListType);
-
+                    mDateDownload = download.getDateDownload();
                     break;
                 case ADDownload.ACTION_GZIP_FILE_SHOW_ALL:
-                    download = new ADDownload(params[0], new Date(), mListType);
+                    download = new ADDownload(params[0], mDateOld, mListType);
                     listValues = download.getList(mListType);
-
+                    mDateDownload = download.getDateDownload();
                     break;
             }
 
@@ -170,8 +197,7 @@ public class ADActivityList extends ListActivity
 
         @Override
         protected void onPostExecute(Void result) {
-            //System.out.println(listValues.get(0));
-            //listValues = download.getList(mListType);
+            writePreferences();
             showList();
 
         }

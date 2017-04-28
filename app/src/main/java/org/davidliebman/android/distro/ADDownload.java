@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -22,8 +23,8 @@ public class ADDownload {
 
     private String mUrl = "";
     private String mSearchString = "";
-    private Date mDateOld = new Date();
-    private Date mDateNew = new Date();
+    private long mDateDownload = 0;
+    private long mDateOld = 0;
     private ArrayList<String> mList = new ArrayList<>();
     private ArrayList<ADPackageInfo> mPackageList = new ArrayList<>();
     private int mListType = 0;
@@ -32,14 +33,23 @@ public class ADDownload {
     public static final int ACTION_TEXT_FILE_SHOW_ALL = 2;
     public static final int ACTION_GZIP_FILE_SHOW_PACKAGE_DEB = 3;
     public static final int ACTION_GZIP_FILE_SHOW_SECTION_DEB = 4;
+    public static final int ACTION_FILE_NO_DOWNLOAD = 5;
 
 
 
-    public ADDownload(String url, Date old, int action) {
+    public ADDownload(String url, long old, int action) {
         mUrl = url;
         mDateOld = old;
         mListType = action;
         //mList = downloadFile(mUrl);
+
+        downloadDate(mUrl);
+        System.out.println("date from download " + new Date(mDateDownload));
+
+        if (mDateOld > mDateDownload || mDateOld == 0) {
+            // list is newest list available
+            action = ACTION_FILE_NO_DOWNLOAD;
+        }
 
         switch (action) {
             case ACTION_GZIP_FILE_SHOW_ALL:
@@ -54,19 +64,30 @@ public class ADDownload {
             case ACTION_GZIP_FILE_SHOW_SECTION_DEB:
                 mList = downloadGzipFile(mUrl);
                 break;
+            case ACTION_FILE_NO_DOWNLOAD:
+                mList = new ArrayList<>();
+                mList.add("newest list is loaded");
+                break;
         }
 
     }
 
     public void setUrl(String url) {mUrl = url;}
     public String getUrl() {return mUrl;}
-    public void setDateOld(Date date) {mDateOld = date;}
-    public Date getDateOld() {return  mDateOld;}
+    //public void setDateOld(Date date) {mDateOld = date;}
+    //public Date getDateOld() {return  mDateOld;}
     public ArrayList<String> getList() {return mList;}
     public void setSearchString(String s) {mSearchString = s;}
+    public long getDateDownload() {return mDateDownload;}
 
     public ArrayList<String> getList(int type) {
         ArrayList<String> sublist = new ArrayList<>();
+
+        if (mListType == ACTION_FILE_NO_DOWNLOAD) {
+            sublist = mList;
+            return sublist;
+        }
+
         mListType = type;
 
 
@@ -150,6 +171,20 @@ public class ADDownload {
         return list;
     }
 
+    public void downloadDate(String url) {
+        try {
+            URL distro = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) distro.openConnection();
+            mDateDownload = connection.getLastModified();
+            connection.disconnect();
+            //mDateNew = new Date(mDateDownload);
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void fillPackageList() {
         int i = 0;
         ADPackageInfo packageInfo = new ADPackageInfo();
@@ -173,6 +208,6 @@ public class ADDownload {
             }
             i++;
         }
-        mList = null;
+        mList = new ArrayList<>();
     }
 }
