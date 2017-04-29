@@ -1,10 +1,6 @@
 package org.davidliebman.android.distro;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -34,7 +30,13 @@ public class ADDownload {
     public static final int ACTION_GZIP_FILE_SHOW_PACKAGE_DEB = 3;
     public static final int ACTION_GZIP_FILE_SHOW_SECTION_DEB = 4;
     public static final int ACTION_FILE_NO_DOWNLOAD = 5;
+    public static final int ACTION_LIST_SHOW_PACKAGE_DEB = 6;
+    public static final int ACTION_LIST_SHOW_SECTION_DEB = 7;
 
+    public static final String STRING_PACKAGE = "Package: ";
+    public static final String STRING_VERSION = "Version: ";
+    public static final String STRING_FILENAME = "Filename: ";
+    public static final String STRING_SECTION = "Section: ";
 
 
     public ADDownload(String url, long old, int action) {
@@ -60,13 +62,21 @@ public class ADDownload {
                 break;
             case ACTION_GZIP_FILE_SHOW_PACKAGE_DEB:
                 mList = downloadGzipFile(mUrl);
+                fillPackageList();
+
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_DEB:
                 mList = downloadGzipFile(mUrl);
+                //fillPackageList();
+
                 break;
             case ACTION_FILE_NO_DOWNLOAD:
                 mList = new ArrayList<>();
                 mList.add("newest list is loaded");
+                break;
+            case ACTION_LIST_SHOW_PACKAGE_DEB:
+                break;
+            case ACTION_LIST_SHOW_SECTION_DEB:
                 break;
         }
 
@@ -93,8 +103,6 @@ public class ADDownload {
 
         switch (mListType) {
             case ACTION_GZIP_FILE_SHOW_PACKAGE_DEB:
-                fillPackageList();
-
                 for (int i = 0; i < mPackageList.size(); i ++ ) {
                     if (mPackageList.get(i).packageSection.trim().endsWith(mSearchString.trim())) {
                         sublist.add(mSearchString + " " + mPackageList.get(i).packageName);
@@ -105,11 +113,28 @@ public class ADDownload {
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_DEB:
                 for (int i = 0; i < mList.size() ; i ++) {
-                    if (mList.get(i).startsWith("Section")) {
-                        String mSection = mList.get(i).substring(("Section:").length());
+                    if (mList.get(i).startsWith(STRING_SECTION)) {
+                        String mSection = mList.get(i).substring((STRING_SECTION).length());
                         if (!sublist.contains(mSection)) {
                             sublist.add(mSection);
                         }
+                    }
+                }
+                fillPackageList();
+                break;
+            case ACTION_LIST_SHOW_PACKAGE_DEB:
+                for (int i = 0; i < mPackageList.size(); i ++ ) {
+                    if (mPackageList.get(i).packageSection.trim().endsWith(mSearchString.trim())) {
+                        sublist.add(mSearchString + " " + mPackageList.get(i).packageName);
+                        //System.out.println(mSearchString);
+
+                    }
+                }
+                break;
+            case ACTION_LIST_SHOW_SECTION_DEB:
+                for (int i = 0; i < mPackageList.size(); i ++) {
+                    if (!sublist.contains(mPackageList.get(i).packageSection)) {
+                        sublist.add(mPackageList.get(i).packageSection);
                     }
                 }
                 break;
@@ -189,18 +214,18 @@ public class ADDownload {
         int i = 0;
         ADPackageInfo packageInfo = new ADPackageInfo();
         while ( i < mList.size()) {
-            if (mList.get(i).startsWith("Section:")) {
-                packageInfo.packageSection = mList.get(i).substring("Section: ".length()).trim();
+            if (mList.get(i).startsWith(STRING_SECTION)) {
+                packageInfo.packageSection = mList.get(i).substring(STRING_SECTION.length()).trim();
             }
-            if (mList.get(i).startsWith("Package:")) {
-                packageInfo.packageName = mList.get(i).substring("Package: ".length());
+            if (mList.get(i).startsWith(STRING_PACKAGE)) {
+                packageInfo.packageName = mList.get(i).substring(STRING_PACKAGE.length());
 
             }
-            if (mList.get(i).startsWith("Version:")) {
-                packageInfo.packageVersion = mList.get(i).substring("Version: ".length());
+            if (mList.get(i).startsWith(STRING_VERSION)) {
+                packageInfo.packageVersion = mList.get(i).substring(STRING_VERSION.length());
             }
-            if (mList.get(i).startsWith("Filename:")) {
-                packageInfo.packageFilename = mList.get(i).substring("Filename: ".length());
+            if (mList.get(i).startsWith(STRING_FILENAME)) {
+                packageInfo.packageFilename = mList.get(i).substring(STRING_FILENAME.length());
             }
             if (mList.get(i).isEmpty()) {
                 mPackageList.add(packageInfo);
@@ -209,5 +234,9 @@ public class ADDownload {
             i++;
         }
         mList = new ArrayList<>();
+    }
+
+    public void processNew() {
+
     }
 }

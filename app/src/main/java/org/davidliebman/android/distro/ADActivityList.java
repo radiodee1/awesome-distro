@@ -6,12 +6,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -28,7 +25,7 @@ public class ADActivityList extends ListActivity
     private List<String> listValues;
     private ArrayAdapter<String> myAdapter;
     private Context mContext;
-    private ADDownload download;
+    private ADDownload download = null;
     private DownloadFilesTask down;
 
     private int mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
@@ -85,9 +82,11 @@ public class ADActivityList extends ListActivity
 
         text.setText("You clicked " + selectedItem + " at position " + position);
 
-        if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB && down.getStatus() == AsyncTask.Status.FINISHED) {
+        if ((mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB ||
+                mListType == ADDownload.ACTION_LIST_SHOW_SECTION_DEB) &&
+                down.getStatus() == AsyncTask.Status.FINISHED) {
 
-            mListType = ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB;
+            mListType = ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB;
             download.setSearchString(selectedItem);
             down = new DownloadFilesTask();
             down.execute(getDistroURL());
@@ -119,9 +118,16 @@ public class ADActivityList extends ListActivity
     public void onDialogPositiveClick(DialogFragment dialog) {
         // check distro
         //DownloadFilesTask
-        mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
-        down = new DownloadFilesTask();
-        down.execute(getDistroURL());
+        if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB && download == null) {
+            mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+            down = new DownloadFilesTask();
+            down.execute(getDistroURL());
+        }
+        else if (true) {
+            mListType = ADDownload.ACTION_LIST_SHOW_SECTION_DEB;
+            down = new DownloadFilesTask();
+            down.execute(getDistroURL());
+        }
     }
 
     @Override
@@ -189,6 +195,12 @@ public class ADActivityList extends ListActivity
                     download = new ADDownload(params[0], mDateOld, mListType);
                     listValues = download.getList(mListType);
                     mDateDownload = download.getDateDownload();
+                    break;
+                case ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB:
+                    listValues = download.getList(mListType);
+                    break;
+                case ADDownload.ACTION_LIST_SHOW_SECTION_DEB:
+                    listValues = download.getList(mListType);
                     break;
             }
 
