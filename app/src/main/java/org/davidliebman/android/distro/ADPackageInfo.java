@@ -11,6 +11,11 @@ public class ADPackageInfo {
     public String packageVersion = "";
     public String packageSection = "";
     public String packageFilename = "";
-    public Date   packageDate = new Date();
+    public long   packageDate = 0;
     public boolean packageIsNew = false;
+
+    @Override
+    public String toString() {
+        return packageName + " " + packageSection + " " + packageVersion + " " + new Date(packageDate);
+    }
 }

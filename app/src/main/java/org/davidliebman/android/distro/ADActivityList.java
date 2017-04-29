@@ -14,6 +14,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class ADActivityList extends ListActivity
         implements ADDialogQuestion.ADDialogQuestionInterface {
@@ -71,6 +72,40 @@ public class ADActivityList extends ListActivity
             }
         });
 
+        Button browseButton = (Button) findViewById(R.id.browse_button);
+        browseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB && download == null) {
+                    mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+                    down = new DownloadFilesTask();
+                    down.execute(getDistroURL());
+                }
+                else if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB) {
+                    mListType = ADDownload.ACTION_LIST_SHOW_SECTION_DEB;
+                    down = new DownloadFilesTask();
+                    down.execute(getDistroURL());
+                }
+                /*
+                else if (mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_DEB) {
+                    mListType = ADDownload.ACTION_LIST_UPDATE_PACKAGE_DEB;
+                    down = new DownloadFilesTask();
+                    down.execute(getDistroURL());
+                }
+                */
+                else if (mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB) {
+                    mListType = ADDownload.ACTION_LIST_SHOW_SECTION_DEB;
+                    down = new DownloadFilesTask();
+                    down.execute(getDistroURL());
+                }
+                else {
+                    mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+                    down = new DownloadFilesTask();
+                    down.execute(getDistroURL());
+                }
+            }
+        });
+
     }
 
     // when an item of the list is clicked
@@ -107,7 +142,7 @@ public class ADActivityList extends ListActivity
         myAdapter.notifyDataSetChanged();
         myAdapter.setNotifyOnChange(true);
         setListAdapter(myAdapter);
-        mDateShowing = mDateDownload;
+        //mDateShowing = mDateDownload;
     }
 
     public String getDistroURL() {
@@ -115,16 +150,16 @@ public class ADActivityList extends ListActivity
     }
 
     @Override
+    protected void onDestroy() {
+        download.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
     public void onDialogPositiveClick(DialogFragment dialog) {
         // check distro
-        //DownloadFilesTask
-        if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB && download == null) {
-            mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
-            down = new DownloadFilesTask();
-            down.execute(getDistroURL());
-        }
-        else if (true) {
-            mListType = ADDownload.ACTION_LIST_SHOW_SECTION_DEB;
+        if (down == null || down.getStatus() == AsyncTask.Status.FINISHED) {
+            mListType = ADDownload.ACTION_LIST_UPDATE_SECTION_DEB;
             down = new DownloadFilesTask();
             down.execute(getDistroURL());
         }
@@ -138,6 +173,11 @@ public class ADActivityList extends ListActivity
     @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
         // configure
+        if (down == null || down.getStatus() == AsyncTask.Status.FINISHED) {
+            mListType = ADDownload.ACTION_ACT_AS_UPDATE;
+            down = new DownloadFilesTask();
+            down.execute(getDistroURL());
+        }
     }
 
     public void writePreferences() {
@@ -158,6 +198,7 @@ public class ADActivityList extends ListActivity
     }
 
     ////////////////////////////////////////
+
     private class DownloadFilesTask extends AsyncTask<String, Void, Void> {
 
         @Override
@@ -184,7 +225,6 @@ public class ADActivityList extends ListActivity
                     break;
                 case ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB:
                     listValues = download.getList(mListType);
-
                     break;
                 case ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB:
                     download = new ADDownload(params[0], mDateOld, mListType);
@@ -202,6 +242,33 @@ public class ADActivityList extends ListActivity
                 case ADDownload.ACTION_LIST_SHOW_SECTION_DEB:
                     listValues = download.getList(mListType);
                     break;
+                case ADDownload.ACTION_LIST_UPDATE_PACKAGE_DEB:
+                    readPreferences();
+                    if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
+                    download.setDateOld(mDateOld);
+                    listValues = download.getDBList(mContext, mListType, mDateOld);
+                    mDateDownload = download.getDateDownload();
+
+                    break;
+                case ADDownload.ACTION_LIST_UPDATE_SECTION_DEB:
+                    readPreferences();
+                    if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
+                    download.setDateOld(mDateOld);
+                    listValues = download.getDBList(mContext, mListType, mDateOld);
+                    mDateDownload = download.getDateDownload();
+
+                    break;
+                case ADDownload.ACTION_ACT_AS_UPDATE:
+                    readPreferences();
+                    if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
+                    download.setDateOld(mDateOld);
+                    mDateDownload = download.getDateDownload();
+
+                    download.setAsUpdate(mContext);
+                    //listValues = download.getDBList(mContext, mListType, mDateOld);
+                    listValues = new ArrayList<>();
+                    writePreferences();
+                    break;
             }
 
             return null;
@@ -209,8 +276,12 @@ public class ADActivityList extends ListActivity
 
         @Override
         protected void onPostExecute(Void result) {
-            writePreferences();
+
             showList();
+            if (download != null && !download.getToastMessage().isEmpty()) {
+                Toast.makeText(mContext, download.getToastMessage(), Toast.LENGTH_LONG).show();
+                download.setToastMessage("");
+            }
 
         }
     }

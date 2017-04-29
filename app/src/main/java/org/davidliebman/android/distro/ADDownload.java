@@ -1,5 +1,13 @@
 package org.davidliebman.android.distro;
 
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.provider.BaseColumns;
+import android.widget.Toast;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,6 +17,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -19,11 +28,15 @@ public class ADDownload {
 
     private String mUrl = "";
     private String mSearchString = "";
+    private String mToastMessage = "";
     private long mDateDownload = 0;
     private long mDateOld = 0;
     private ArrayList<String> mList = new ArrayList<>();
     private ArrayList<ADPackageInfo> mPackageList = new ArrayList<>();
+    private ArrayList<String> mDBList = new ArrayList<>();
     private int mListType = 0;
+    private PackageDbHelper mDbHelper;
+    private boolean mTestingDisable = true;
 
     public static final int ACTION_GZIP_FILE_SHOW_ALL = 1;
     public static final int ACTION_TEXT_FILE_SHOW_ALL = 2;
@@ -32,11 +45,24 @@ public class ADDownload {
     public static final int ACTION_FILE_NO_DOWNLOAD = 5;
     public static final int ACTION_LIST_SHOW_PACKAGE_DEB = 6;
     public static final int ACTION_LIST_SHOW_SECTION_DEB = 7;
+    public static final int ACTION_LIST_UPDATE_PACKAGE_DEB = 8;
+    public static final int ACTION_LIST_UPDATE_SECTION_DEB = 9;
+    public static final int ACTION_ACT_AS_UPDATE = 10;
 
     public static final String STRING_PACKAGE = "Package: ";
     public static final String STRING_VERSION = "Version: ";
     public static final String STRING_FILENAME = "Filename: ";
     public static final String STRING_SECTION = "Section: ";
+
+    public static class Entry implements BaseColumns {
+        public static final String TABLE_NAME = "package";
+        public static final String COLUMN_NAME_NAME = "package_name";
+        public static final String COLUMN_NAME_FILENAME = "package_filename";
+        public static final String COLUMN_NAME_SECTION = "package_section";
+        public static final String COLUMN_NAME_DATE = "package_date";
+        public static final String COLUMN_NAME_VERSION = "package_version";
+        //public static final String COLUMN_NAME_ID = "id";
+    }
 
 
     public ADDownload(String url, long old, int action) {
@@ -48,9 +74,10 @@ public class ADDownload {
         downloadDate(mUrl);
         System.out.println("date from download " + new Date(mDateDownload));
 
+
         if (mDateOld > mDateDownload || mDateOld == 0) {
             // list is newest list available
-            action = ACTION_FILE_NO_DOWNLOAD;
+            //action = ACTION_FILE_NO_DOWNLOAD;
         }
 
         switch (action) {
@@ -78,17 +105,34 @@ public class ADDownload {
                 break;
             case ACTION_LIST_SHOW_SECTION_DEB:
                 break;
+            case ACTION_ACT_AS_UPDATE:
+                mList = downloadGzipFile(mUrl);
+
+                fillPackageList();
+                break;
+            case ACTION_LIST_UPDATE_PACKAGE_DEB:
+                mList = downloadGzipFile(mUrl);
+
+                fillPackageList();
+                break;
+            case ACTION_LIST_UPDATE_SECTION_DEB:
+                mList = downloadGzipFile(mUrl);
+
+                fillPackageList();
+                break;
         }
 
     }
 
-    public void setUrl(String url) {mUrl = url;}
-    public String getUrl() {return mUrl;}
-    //public void setDateOld(Date date) {mDateOld = date;}
+    //public void setUrl(String url) {mUrl = url;}
+    //public String getUrl() {return mUrl;}
+    public void setDateOld(long date) {mDateOld = date;}
     //public Date getDateOld() {return  mDateOld;}
     public ArrayList<String> getList() {return mList;}
     public void setSearchString(String s) {mSearchString = s;}
     public long getDateDownload() {return mDateDownload;}
+    public String getToastMessage() {return mToastMessage;}
+    public void setToastMessage(String in) {mToastMessage = in;}
 
     public ArrayList<String> getList(int type) {
         ArrayList<String> sublist = new ArrayList<>();
@@ -144,6 +188,22 @@ public class ADDownload {
         return sublist;
     }
 
+
+    public ArrayList<String> getDBList(Context context, int action, long date) {
+
+        mListType = action;
+        mDateOld = date;
+
+        switch (mListType) {
+            case ACTION_LIST_UPDATE_PACKAGE_DEB:
+                processNew(context);
+                break;
+            case ACTION_LIST_UPDATE_SECTION_DEB:
+                processNew(context);
+                break;
+        }
+        return mDBList;
+    }
 
     private ArrayList<String> downloadFile(String url) {
 
@@ -234,9 +294,258 @@ public class ADDownload {
             i++;
         }
         mList = new ArrayList<>();
+        System.out.println("total packages from download " + mPackageList.size());
     }
 
-    public void processNew() {
+    public void onDestroy() {
+        if (mDbHelper != null) mDbHelper.close();
+    }
 
+    public void processNew(Context context) {
+        mDBList = new ArrayList<>();
+
+        System.out.println("time long " + new Date(mDateOld) + " == " + new Date(mDateDownload));
+
+        if ((mDateOld >= mDateDownload || mDateOld == 0 ) && !mTestingDisable) {
+            mToastMessage = "The Package file is already the newest";
+            return;
+        }
+        //mPackageList = new ArrayList<>();
+
+        if (mDbHelper == null) {
+            mDbHelper = new PackageDbHelper(context);
+        }
+        ArrayList<ADPackageInfo> test = getAllPackageRecords();
+
+        for (int j = 0; j < test.size(); j ++) {
+            // check if file is new!
+            for (int i = 0; i < mPackageList.size(); i++) {
+                //display packages that are not the same version number
+                ADPackageInfo info = test.get(j);// getPackageRecord(mPackageList.get(i).packageName);
+                if (info.packageName.contentEquals(mPackageList.get(i).packageName) &&
+                        !info.packageVersion.contentEquals(mPackageList.get(i).packageVersion)) {
+                    mDBList.add(info.packageName);
+                    System.out.println(info);
+
+                }
+            }
+        }
+        System.out.println("done loop");
+
+    }
+
+    public void setAsUpdate(Context context) {
+
+        System.out.println("time long " + new Date(mDateOld) + " == " + new Date(mDateDownload));
+
+        if (mDateOld >= mDateDownload && mDateOld != 0) {
+            mDBList = new ArrayList<>();
+            mToastMessage = "listings are already newest!";
+            return;
+        }
+        //mPackageList = new ArrayList<>();
+
+
+        if (mDbHelper == null) {
+            mDbHelper = new PackageDbHelper(context);
+        }
+        for (int i = 0; i < mPackageList.size(); i ++ ) {
+            //check for each package, 1) update version num, 2) add package if it is not there.
+            ADPackageInfo info = getPackageRecord(mPackageList.get(i).packageName);
+            ADPackageInfo pack = mPackageList.get(i);
+            pack.packageDate = mDateDownload;
+
+            if (info.packageIsNew &&
+                    !info.packageVersion.contentEquals(mPackageList.get(i).packageVersion)) {
+                //mDBList.add(info.packageName);
+                updatePackageRecord(pack);
+            }
+            else {
+                savePackageRecord(pack);
+                //System.out.println(pack);
+            }
+        }
+    }
+
+    public void deleteDB(Context context) {
+         String SQL_DELETE_ENTRIES =
+                "DROP TABLE IF EXISTS " + Entry.TABLE_NAME;
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+        db.rawQuery(SQL_DELETE_ENTRIES, null);
+
+    }
+
+    public ArrayList<ADPackageInfo> getAllPackageRecords() {
+        ArrayList<ADPackageInfo> list = new ArrayList<>();
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        // Define a projection that specifies which columns from the database
+        // you will actually use after this query.
+        String[] projection = {
+                Entry._ID,
+                Entry.COLUMN_NAME_NAME,
+                Entry.COLUMN_NAME_FILENAME,
+                Entry.COLUMN_NAME_SECTION,
+                Entry.COLUMN_NAME_VERSION,
+                Entry.COLUMN_NAME_DATE
+        };
+
+        // Filter results WHERE "title" = 'My Title'
+        String selection = Entry.COLUMN_NAME_NAME + " = ?";
+        String[] selectionArgs = { "*" };
+
+        String mRawQuery = "SELECT * FROM " + Entry.TABLE_NAME ;
+        // How you want the results sorted in the resulting Cursor
+        String sortOrder = Entry.COLUMN_NAME_NAME + " DESC";
+
+        Cursor cursor = db.rawQuery(mRawQuery, null);
+
+        /*
+        Cursor cursor = db.query(
+                Entry.TABLE_NAME,                     // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                sortOrder                                 // The sort order
+        );
+        */
+
+        //List itemIds = new ArrayList<>();
+        while(cursor.moveToNext()) {
+            ADPackageInfo record = new ADPackageInfo();
+
+            record.packageName = cursor.getString(cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME_NAME));
+            record.packageSection = cursor.getString(cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME_SECTION));
+            record.packageFilename = cursor.getString(cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME_FILENAME));
+            record.packageVersion = cursor.getString(cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME_VERSION));
+            record.packageDate = cursor.getLong(cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME_DATE));
+            //record.packageIsNew = true;
+            list.add(record);
+
+        }
+        cursor.close();
+        return list;
+    }
+
+    public ADPackageInfo getPackageRecord(String pName) {
+        ADPackageInfo record = new ADPackageInfo();
+
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        // Define a projection that specifies which columns from the database
+        // you will actually use after this query.
+        String[] projection = {
+                Entry._ID,
+                Entry.COLUMN_NAME_NAME,
+                Entry.COLUMN_NAME_FILENAME,
+                Entry.COLUMN_NAME_SECTION,
+                Entry.COLUMN_NAME_VERSION,
+                Entry.COLUMN_NAME_DATE
+        };
+
+        // Filter results WHERE "title" = 'My Title'
+        String selection = Entry.COLUMN_NAME_NAME + " = ?";
+        String[] selectionArgs = { pName };
+
+        // How you want the results sorted in the resulting Cursor
+        String sortOrder = Entry.COLUMN_NAME_NAME + " DESC";
+
+        Cursor cursor = db.query(
+                Entry.TABLE_NAME,                     // The table to query
+                projection,                               // The columns to return
+                selection,                                // The columns for the WHERE clause
+                selectionArgs,                            // The values for the WHERE clause
+                null,                                     // don't group the rows
+                null,                                     // don't filter by row groups
+                sortOrder                                 // The sort order
+        );
+
+        //List itemIds = new ArrayList<>();
+        while(cursor.moveToNext()) {
+
+            record.packageName = cursor.getString(cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME_NAME));
+            record.packageSection = cursor.getString(cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME_SECTION));
+            record.packageFilename = cursor.getString(cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME_FILENAME));
+            record.packageVersion = cursor.getString(cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME_VERSION));
+            record.packageDate = cursor.getLong(cursor.getColumnIndexOrThrow(Entry.COLUMN_NAME_DATE));
+            record.packageIsNew = true;
+        }
+        cursor.close();
+
+        return record;
+    }
+
+    public void savePackageRecord(ADPackageInfo record) {
+        // Gets the data repository in write mode
+        SQLiteDatabase db = mDbHelper.getWritableDatabase();
+
+        // Create a new map of values, where column names are the keys
+        ContentValues values = new ContentValues();
+        values.put(Entry.COLUMN_NAME_NAME, record.packageName);
+        values.put(Entry.COLUMN_NAME_FILENAME, record.packageFilename);
+        values.put(Entry.COLUMN_NAME_SECTION, record.packageSection);
+        values.put(Entry.COLUMN_NAME_VERSION, record.packageVersion);
+        values.put(Entry.COLUMN_NAME_DATE, record.packageDate);
+
+        // Insert the new row, returning the primary key value of the new row
+        long newRowId = db.insert(Entry.TABLE_NAME, null, values);
+    }
+
+    public void updatePackageRecord (ADPackageInfo record) {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        // New value for one column
+        ContentValues values = new ContentValues();
+        values.put(Entry.COLUMN_NAME_VERSION, record.packageVersion);
+
+        // Which row to update, based on the title
+        String selection = Entry.COLUMN_NAME_NAME + " LIKE ?";
+        String[] selectionArgs = { record.packageName };
+
+        int count = db.update(
+                Entry.TABLE_NAME,
+                values,
+                selection,
+                selectionArgs);
+
+    }
+    ///////////////////////////////////////////////
+
+    public class PackageDbHelper extends SQLiteOpenHelper {
+        // If you change the database schema, you must increment the database version.
+        public static final int DATABASE_VERSION = 1;
+        public static final String DATABASE_NAME = "Distro.db";
+
+        private static final String SQL_CREATE_ENTRIES =
+                "CREATE TABLE " + Entry.TABLE_NAME + " (" +
+                        Entry._ID + " INTEGER PRIMARY KEY," +
+                        Entry.COLUMN_NAME_NAME + " TEXT," +
+                        Entry.COLUMN_NAME_FILENAME + " TEXT, "+
+                        Entry.COLUMN_NAME_VERSION + " TEXT, " +
+                        Entry.COLUMN_NAME_SECTION + " TEXT, " +
+                        Entry.COLUMN_NAME_DATE + " INTEGER " +
+                        ")";
+
+        private static final String SQL_DELETE_ENTRIES =
+                "DROP TABLE IF EXISTS " + Entry.TABLE_NAME;
+
+        public PackageDbHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
+        public void onCreate(SQLiteDatabase db) {
+            db.execSQL(SQL_CREATE_ENTRIES);
+        }
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            // This database is only a cache for online data, so its upgrade policy is
+            // to simply to discard the data and start over
+            db.execSQL(SQL_DELETE_ENTRIES);
+            onCreate(db);
+        }
+        public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            onUpgrade(db, oldVersion, newVersion);
+        }
     }
 }
