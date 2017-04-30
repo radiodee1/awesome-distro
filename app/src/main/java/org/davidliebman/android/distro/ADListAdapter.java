@@ -20,6 +20,7 @@ public class ADListAdapter extends BaseAdapter {
 
     private Activity activity;
     private ArrayList<ADPackageInfo> data;
+
     private static LayoutInflater inflater=null;
     //public ImageLoader imageLoader;
 
@@ -28,6 +29,19 @@ public class ADListAdapter extends BaseAdapter {
         data = d;
         inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         //imageLoader=new ImageLoader(activity.getApplicationContext());
+    }
+
+    public ADListAdapter(Activity a, ArrayList<ADPackageInfo> d, ArrayList<ADPackageInfo> l) {
+        activity = a;
+        data = d;
+        inflater = (LayoutInflater)activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        for (int i = 0; i < l.size(); i ++) {
+            for (int j = 0; j < data.size(); j ++) {
+                if (l.get(i).packageName.contentEquals(data.get(j).packageName)) {
+                    data.get(j).packageIsNew = true;
+                }
+            }
+        }
     }
 
     @Override

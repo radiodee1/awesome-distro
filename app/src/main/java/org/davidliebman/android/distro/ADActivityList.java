@@ -134,6 +134,35 @@ public class ADActivityList extends ListActivity
             //listValues = download.getList(mListType);
             //showList();
         }
+        else if ((mListType == ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB ||
+                mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB) &&
+                down.getStatus() == AsyncTask.Status.FINISHED) {
+            boolean test = selectedItem.packageIsNew;
+            listValues.get(position).packageIsNew = ! test;
+
+            //showList();
+            View checkbox_green = (View) view.findViewById(R.id.list_image_check);
+            View checkbox_red = (View) view.findViewById(R.id.list_image_uncheck);
+
+            if(!test) {
+                checkbox_green.setVisibility(View.VISIBLE);
+                checkbox_red.setVisibility(View.GONE);
+
+                mListType = ADDownload.ACTION_ADD_PACKAGE;
+
+                down = new DownloadFilesTask();
+                down.execute(getDistroURL(), Integer.toString(position));
+            }
+            else {
+                checkbox_green.setVisibility(View.GONE);
+                checkbox_red.setVisibility(View.VISIBLE);
+                mListType = ADDownload.ACTION_REMOVE_PACKAGE;
+                down = new DownloadFilesTask();
+                down.execute(getDistroURL(), Integer.toString(position));
+            }
+        }
+
+
     }
 
     public void showDialog() {
@@ -141,13 +170,22 @@ public class ADActivityList extends ListActivity
         dialog.show(getFragmentManager(), "button_check");
     }
 
+
+
     public void showList() {
-        //myAdapter = new ArrayAdapter <String>(mContext, R.layout.row_layout, R.id.listText, listValues);
-        myAdapter = new ADListAdapter(this, listValues);
-        //myAdapter.notifyDataSetChanged();
-        //myAdapter.setNotifyOnChange(true);
+        if (mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB) {
+            ArrayList<ADPackageInfo> chosen = download.getWatchedPackages(mContext);
+            myAdapter = new ADListAdapter(this, listValues, chosen);
+
+        }
+        else {
+            myAdapter = new ADListAdapter(this, listValues);
+
+        }
+
+
+        //myAdapter = new ADListAdapter(this, listValues);
         setListAdapter(myAdapter);
-        //mDateShowing = mDateDownload;
     }
 
     public String getDistroURL() {
@@ -274,6 +312,18 @@ public class ADActivityList extends ListActivity
                     listValues = new ArrayList<>();
                     writePreferences();
                     break;
+                case ADDownload.ACTION_ADD_PACKAGE:
+                    if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
+                    int position = Integer.parseInt(params[1]);
+                    download.addPackage(mContext, listValues.get(position));
+                    //mListType = ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB;
+                    break;
+                case ADDownload.ACTION_REMOVE_PACKAGE:
+                    if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
+                    int remove = Integer.parseInt(params[1]);
+                    download.removePackage(mContext, listValues.get(remove));
+                    //mListType = ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB;
+                    break;
             }
 
             return null;
@@ -282,7 +332,12 @@ public class ADActivityList extends ListActivity
         @Override
         protected void onPostExecute(Void result) {
 
-            showList();
+            if (mListType == ADDownload.ACTION_REMOVE_PACKAGE || mListType == ADDownload.ACTION_ADD_PACKAGE) {
+                mListType = ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB;
+            }
+            else {
+                showList();
+            }
             if (download != null && !download.getToastMessage().isEmpty()) {
                 Toast.makeText(mContext, download.getToastMessage(), Toast.LENGTH_LONG).show();
                 download.setToastMessage("");

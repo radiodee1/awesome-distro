@@ -48,6 +48,8 @@ public class ADDownload {
     public static final int ACTION_LIST_UPDATE_PACKAGE_DEB = 8;
     public static final int ACTION_LIST_UPDATE_SECTION_DEB = 9;
     public static final int ACTION_ACT_AS_UPDATE = 10;
+    public static final int ACTION_ADD_PACKAGE = 11;
+    public static final int ACTION_REMOVE_PACKAGE = 12;
 
     public static final String STRING_PACKAGE = "Package: ";
     public static final String STRING_VERSION = "Version: ";
@@ -313,6 +315,34 @@ public class ADDownload {
         if (mDbHelper != null) mDbHelper.close();
     }
 
+    public void addPackage(Context context, ADPackageInfo info) {
+        if (mDbHelper == null) {
+            mDbHelper = new PackageDbHelper(context);
+        }
+
+        ADPackageInfo record = getPackageRecord(info.packageName);
+        if (record.packageName.isEmpty()) savePackageRecord(info);
+
+        ArrayList<ADPackageInfo> test = getAllPackageRecords();
+        for(int i = 0; i < test.size(); i ++ ) System.out.println("saved " + test.get(i));
+        System.out.println("done list saved");
+
+    }
+
+    public void removePackage(Context context, ADPackageInfo info) {
+        if (mDbHelper == null) {
+            mDbHelper = new PackageDbHelper(context);
+        }
+        deletePackage(info);
+
+    }
+    public ArrayList<ADPackageInfo> getWatchedPackages(Context context) {
+        if (mDbHelper == null) {
+            mDbHelper = new PackageDbHelper(context);
+        }
+        return getAllPackageRecords();
+    }
+
     public void processNew(Context context) {
         mDBList = new ArrayList<>();
 
@@ -386,7 +416,19 @@ public class ADDownload {
 
     }
 
-    public ArrayList<ADPackageInfo> getAllPackageRecords() {
+    private void deletePackage(ADPackageInfo info) {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+
+        // Define 'where' part of query.
+        String selection = Entry.COLUMN_NAME_NAME + " LIKE ?";
+        // Specify arguments in placeholder order.
+        String[] selectionArgs = { info.packageName };
+        // Issue SQL statement.
+        db.delete(Entry.TABLE_NAME, selection, selectionArgs);
+
+    }
+
+    private ArrayList<ADPackageInfo> getAllPackageRecords() {
         ArrayList<ADPackageInfo> list = new ArrayList<>();
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
@@ -422,7 +464,7 @@ public class ADDownload {
         return list;
     }
 
-    public ADPackageInfo getPackageRecord(String pName) {
+    private ADPackageInfo getPackageRecord(String pName) {
         ADPackageInfo record = new ADPackageInfo();
 
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
@@ -470,7 +512,7 @@ public class ADDownload {
         return record;
     }
 
-    public void savePackageRecord(ADPackageInfo record) {
+    private void savePackageRecord(ADPackageInfo record) {
         // Gets the data repository in write mode
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
 
@@ -486,7 +528,7 @@ public class ADDownload {
         long newRowId = db.insert(Entry.TABLE_NAME, null, values);
     }
 
-    public void updatePackageRecord (ADPackageInfo record) {
+    private void updatePackageRecord (ADPackageInfo record) {
         SQLiteDatabase db = mDbHelper.getReadableDatabase();
 
         // New value for one column
