@@ -3,6 +3,7 @@ package org.davidliebman.android.distro;
 import android.app.DialogFragment;
 import android.app.ListActivity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -216,6 +217,10 @@ public class ADActivityList extends ListActivity
     @Override
     public void onDialogNeutralClick(DialogFragment dialog) {
         // configure
+
+        Intent config = new Intent(this, ADActivityConfig.class);
+        startActivity(config);
+
         if (down == null || down.getStatus() == AsyncTask.Status.FINISHED) {
             mListType = ADDownload.ACTION_ACT_AS_UPDATE;
             down = new DownloadFilesTask();

@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="org.davidliebman.android.distro.ADActivityConfig"
+    tools:showIn="@layout/activity_adconfig">
+
+    <LinearLayout
+        android:layout_width="368dp"
+        android:layout_height="495dp"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteY="8dp"
+        tools:layout_editor_absoluteX="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/radio_distro">
+
+                <RadioButton
+                    android:id="@+id/radio_deb"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Debian"
+                    android:onClick="onRadioButtonClick"/>
+
+                <RadioButton
+                    android:id="@+id/radio_ubu"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Ubuntu"
+                    android:onClick="onRadioButtonClick"/>
+
+            </RadioGroup>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/layout_debian">
+
+            <TextView
+                android:id="@+id/text_name_deb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Debian"
+                android:visibility="visible" />
+
+            <Spinner
+                android:id="@+id/spinner_base_url_deb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/text_arch_deb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Architecture" />
+
+            <Spinner
+                android:id="@+id/spinner_arch_deb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/text_release_deb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Release" />
+
+            <Spinner
+                android:id="@+id/spinner_release_deb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/text_mcnf_deb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Main, etc." />
+
+            <Spinner
+                android:id="@+id/spinner_mcnf_deb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/text_show_url_deb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="url" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/layout_ubuntu">
+
+            <TextView
+                android:id="@+id/text_name_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ubuntu"
+                android:visibility="visible" />
+
+            <Spinner
+                android:id="@+id/spinner_base_url_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/text_arch_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Architecture" />
+
+            <Spinner
+                android:id="@+id/spinner_arch_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/text_release_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Release" />
+
+            <Spinner
+                android:id="@+id/spinner_release_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/text_mcnf_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Main, etc." />
+
+            <Spinner
+                android:id="@+id/spinner_mcnf_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/text_show_url_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="url" />
+        </LinearLayout>
+    </LinearLayout>
+</android.support.constraint.ConstraintLayout>

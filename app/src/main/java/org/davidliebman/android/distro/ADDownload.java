@@ -323,9 +323,9 @@ public class ADDownload {
         ADPackageInfo record = getPackageRecord(info.packageName);
         if (record.packageName.isEmpty()) savePackageRecord(info);
 
-        ArrayList<ADPackageInfo> test = getAllPackageRecords();
-        for(int i = 0; i < test.size(); i ++ ) System.out.println("saved " + test.get(i));
-        System.out.println("done list saved");
+        //ArrayList<ADPackageInfo> test = getAllPackageRecords();
+        //for(int i = 0; i < test.size(); i ++ ) System.out.println("saved " + test.get(i));
+        //System.out.println("done list saved");
 
     }
 
