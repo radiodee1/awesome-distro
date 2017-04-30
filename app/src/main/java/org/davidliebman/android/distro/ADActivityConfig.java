@@ -6,15 +6,23 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 
-public class ADActivityConfig extends AppCompatActivity {
+public class ADActivityConfig extends AppCompatActivity
+        implements AdapterView.OnItemSelectedListener{
 
     View debian_layout;
     View ubuntu_layout;
+
+    String string_arch;
+    String string_base_url;
+    String string_release;
+    String string_mcnf;
+    String string_distro;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +57,7 @@ public class ADActivityConfig extends AppCompatActivity {
         adapter1.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner1.setAdapter(adapter1);
+        spinner1.setOnItemSelectedListener( this );
 
         ArrayAdapter<CharSequence> adapter2 = ArrayAdapter.createFromResource(this,
                 R.array.spinner_arch_deb, android.R.layout.simple_spinner_item);
@@ -56,6 +65,7 @@ public class ADActivityConfig extends AppCompatActivity {
         adapter2.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner2.setAdapter(adapter2);
+        spinner2.setOnItemSelectedListener( this );
 
         ArrayAdapter<CharSequence> adapter3 = ArrayAdapter.createFromResource(this,
                 R.array.spinner_release_deb, android.R.layout.simple_spinner_item);
@@ -63,6 +73,7 @@ public class ADActivityConfig extends AppCompatActivity {
         adapter3.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner3.setAdapter(adapter3);
+        spinner3.setOnItemSelectedListener( this );
 
         ArrayAdapter<CharSequence> adapter4 = ArrayAdapter.createFromResource(this,
                 R.array.spinner_mcnf_deb, android.R.layout.simple_spinner_item);
@@ -70,6 +81,7 @@ public class ADActivityConfig extends AppCompatActivity {
         adapter4.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner4.setAdapter(adapter4);
+        spinner4.setOnItemSelectedListener( this );
 
         ArrayAdapter<CharSequence> adapter5 = ArrayAdapter.createFromResource(this,
                 R.array.spinner_base_url_ubu, android.R.layout.simple_spinner_item);
@@ -77,6 +89,7 @@ public class ADActivityConfig extends AppCompatActivity {
         adapter5.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner5.setAdapter(adapter5);
+        spinner5.setOnItemSelectedListener( this );
 
         ArrayAdapter<CharSequence> adapter6 = ArrayAdapter.createFromResource(this,
                 R.array.spinner_arch_ubu, android.R.layout.simple_spinner_item);
@@ -84,6 +97,7 @@ public class ADActivityConfig extends AppCompatActivity {
         adapter6.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner6.setAdapter(adapter6);
+        spinner6.setOnItemSelectedListener( this );
 
         ArrayAdapter<CharSequence> adapter7 = ArrayAdapter.createFromResource(this,
                 R.array.spinner_release_ubu, android.R.layout.simple_spinner_item);
@@ -91,6 +105,7 @@ public class ADActivityConfig extends AppCompatActivity {
         adapter7.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner7.setAdapter(adapter7);
+        spinner7.setOnItemSelectedListener( this );
 
         ArrayAdapter<CharSequence> adapter8 = ArrayAdapter.createFromResource(this,
                 R.array.spinner_mcnf_ubu, android.R.layout.simple_spinner_item);
@@ -98,6 +113,7 @@ public class ADActivityConfig extends AppCompatActivity {
         adapter8.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         // Apply the adapter to the spinner
         spinner8.setAdapter(adapter8);
+        spinner8.setOnItemSelectedListener( this );
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -116,17 +132,54 @@ public class ADActivityConfig extends AppCompatActivity {
         // Check which radio button was clicked
         switch(view.getId()) {
             case R.id.radio_deb:
-                if (checked)
+                if (checked) {
                     debian_layout.setVisibility(View.VISIBLE);
                     ubuntu_layout.setVisibility(View.GONE);
-
-                    break;
+                    string_distro = "debian";
+                }
+                break;
             case R.id.radio_ubu:
-                if (checked)
+                if (checked) {
                     debian_layout.setVisibility(View.GONE);
                     ubuntu_layout.setVisibility(View.VISIBLE);
-
+                    string_distro = "ubuntu";
+                }
                 break;
         }
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        switch (parent.getId()) {
+            case R.id.spinner_arch_deb:
+                string_arch = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spinner_arch_ubu:
+                string_arch = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spinner_base_url_deb:
+                string_base_url = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spinner_base_url_ubu:
+                string_base_url = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spinner_release_deb:
+                string_release = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spinner_release_ubu:
+                string_release = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spinner_mcnf_deb:
+                string_mcnf = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spinner_mcnf_ubu:
+                string_mcnf = (String) parent.getItemAtPosition(position);
+                break;
+        }
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }
