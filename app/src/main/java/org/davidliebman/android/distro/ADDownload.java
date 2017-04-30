@@ -33,7 +33,7 @@ public class ADDownload {
     private long mDateOld = 0;
     private ArrayList<String> mList = new ArrayList<>();
     private ArrayList<ADPackageInfo> mPackageList = new ArrayList<>();
-    private ArrayList<String> mDBList = new ArrayList<>();
+    private ArrayList<ADPackageInfo> mDBList = new ArrayList<>();
     private int mListType = 0;
     private PackageDbHelper mDbHelper;
     private boolean mTestingDisable = true;
@@ -128,18 +128,18 @@ public class ADDownload {
     //public String getUrl() {return mUrl;}
     public void setDateOld(long date) {mDateOld = date;}
     //public Date getDateOld() {return  mDateOld;}
-    public ArrayList<String> getList() {return mList;}
+    //public ArrayList<ADPackageInfo> getList() {return mList;}
     public void setSearchString(String s) {mSearchString = s;}
     public long getDateDownload() {return mDateDownload;}
     public String getToastMessage() {return mToastMessage;}
     public void setToastMessage(String in) {mToastMessage = in;}
 
-    public ArrayList<String> getList(int type) {
-        ArrayList<String> sublist = new ArrayList<>();
+    public ArrayList<ADPackageInfo> getList(int type) {
+        ArrayList<ADPackageInfo> sublist = new ArrayList<>();
 
         if (mListType == ACTION_FILE_NO_DOWNLOAD) {
-            sublist = mList;
-            return sublist;
+            //sublist = mList;
+            //return sublist;
         }
 
         mListType = type;
@@ -149,18 +149,25 @@ public class ADDownload {
             case ACTION_GZIP_FILE_SHOW_PACKAGE_DEB:
                 for (int i = 0; i < mPackageList.size(); i ++ ) {
                     if (mPackageList.get(i).packageSection.trim().endsWith(mSearchString.trim())) {
-                        sublist.add(mSearchString + " " + mPackageList.get(i).packageName);
+                        //ADPackageInfo info = new ADPackageInfo();
+
+                        sublist.add(mPackageList.get(i));
                         //System.out.println(mSearchString);
 
                     }
                 }
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_DEB:
+                ArrayList<String> repeats = new ArrayList<>();
+
                 for (int i = 0; i < mList.size() ; i ++) {
                     if (mList.get(i).startsWith(STRING_SECTION)) {
                         String mSection = mList.get(i).substring((STRING_SECTION).length());
-                        if (!sublist.contains(mSection)) {
-                            sublist.add(mSection);
+                        if (!repeats.contains(mSection.trim())) {
+                            ADPackageInfo info = new ADPackageInfo();
+                            info.packageName = mSection;
+                            repeats.add(mSection.trim());
+                            sublist.add(info);
                         }
                     }
                 }
@@ -169,16 +176,21 @@ public class ADDownload {
             case ACTION_LIST_SHOW_PACKAGE_DEB:
                 for (int i = 0; i < mPackageList.size(); i ++ ) {
                     if (mPackageList.get(i).packageSection.trim().endsWith(mSearchString.trim())) {
-                        sublist.add(mSearchString + " " + mPackageList.get(i).packageName);
+                        sublist.add(mPackageList.get(i));
                         //System.out.println(mSearchString);
 
                     }
                 }
                 break;
             case ACTION_LIST_SHOW_SECTION_DEB:
+                ArrayList<String> repeats_also = new ArrayList<>();
+
                 for (int i = 0; i < mPackageList.size(); i ++) {
-                    if (!sublist.contains(mPackageList.get(i).packageSection)) {
-                        sublist.add(mPackageList.get(i).packageSection);
+                    if (!repeats_also.contains(mPackageList.get(i).packageSection)) {
+                        ADPackageInfo info = new ADPackageInfo();
+                        info.packageName = mPackageList.get(i).packageSection;
+                        repeats_also.add(mPackageList.get(i).packageSection);
+                        sublist.add(info);
                     }
                 }
                 break;
@@ -189,7 +201,7 @@ public class ADDownload {
     }
 
 
-    public ArrayList<String> getDBList(Context context, int action, long date) {
+    public ArrayList<ADPackageInfo> getDBList(Context context, int action, long date) {
 
         mListType = action;
         mDateOld = date;
@@ -324,7 +336,7 @@ public class ADDownload {
                 ADPackageInfo info = test.get(j);// getPackageRecord(mPackageList.get(i).packageName);
                 if (info.packageName.contentEquals(mPackageList.get(i).packageName) &&
                         !info.packageVersion.contentEquals(mPackageList.get(i).packageVersion)) {
-                    mDBList.add(info.packageName);
+                    mDBList.add(info);
                     System.out.println(info);
 
                 }
@@ -343,28 +355,27 @@ public class ADDownload {
             mToastMessage = "listings are already newest!";
             return;
         }
-        //mPackageList = new ArrayList<>();
-
 
         if (mDbHelper == null) {
             mDbHelper = new PackageDbHelper(context);
         }
-        for (int i = 0; i < mPackageList.size(); i ++ ) {
-            //check for each package, 1) update version num, 2) add package if it is not there.
-            ADPackageInfo info = getPackageRecord(mPackageList.get(i).packageName);
-            ADPackageInfo pack = mPackageList.get(i);
-            pack.packageDate = mDateDownload;
 
-            if (info.packageIsNew &&
-                    !info.packageVersion.contentEquals(mPackageList.get(i).packageVersion)) {
-                //mDBList.add(info.packageName);
-                updatePackageRecord(pack);
-            }
-            else {
-                savePackageRecord(pack);
-                //System.out.println(pack);
+        ArrayList<ADPackageInfo> test = getAllPackageRecords();
+
+        for (int j = 0; j < test.size(); j ++ ) {
+            for (int i = 0; i < mPackageList.size(); i++) {
+                //check for each package -- update version num
+                ADPackageInfo info = test.get(j);
+                ADPackageInfo pack = mPackageList.get(i);
+                pack.packageDate = mDateDownload;
+
+                if (!info.packageVersion.contentEquals(mPackageList.get(i).packageVersion)) {
+
+                    updatePackageRecord(pack);
+                }
             }
         }
+
     }
 
     public void deleteDB(Context context) {
@@ -391,29 +402,10 @@ public class ADDownload {
                 Entry.COLUMN_NAME_DATE
         };
 
-        // Filter results WHERE "title" = 'My Title'
-        String selection = Entry.COLUMN_NAME_NAME + " = ?";
-        String[] selectionArgs = { "*" };
-
         String mRawQuery = "SELECT * FROM " + Entry.TABLE_NAME ;
-        // How you want the results sorted in the resulting Cursor
-        String sortOrder = Entry.COLUMN_NAME_NAME + " DESC";
 
         Cursor cursor = db.rawQuery(mRawQuery, null);
 
-        /*
-        Cursor cursor = db.query(
-                Entry.TABLE_NAME,                     // The table to query
-                projection,                               // The columns to return
-                selection,                                // The columns for the WHERE clause
-                selectionArgs,                            // The values for the WHERE clause
-                null,                                     // don't group the rows
-                null,                                     // don't filter by row groups
-                sortOrder                                 // The sort order
-        );
-        */
-
-        //List itemIds = new ArrayList<>();
         while(cursor.moveToNext()) {
             ADPackageInfo record = new ADPackageInfo();
 

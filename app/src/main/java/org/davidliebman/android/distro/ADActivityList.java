@@ -23,8 +23,9 @@ public class ADActivityList extends ListActivity
     private long mDateDownload = 0;
     private long mDateShowing = 0;
     private TextView text;
-    private List<String> listValues;
-    private ArrayAdapter<String> myAdapter;
+    private ArrayList<ADPackageInfo> listValues;
+    //private ArrayAdapter<String> myAdapter;
+    private ADListAdapter myAdapter;
     private Context mContext;
     private ADDownload download = null;
     private DownloadFilesTask down;
@@ -42,24 +43,28 @@ public class ADActivityList extends ListActivity
 
         text = (TextView) findViewById(R.id.mainText);
 
-        listValues = new ArrayList<String>();
+        listValues = new ArrayList<ADPackageInfo>();
 
         for(int i = 0; i < 1 ; i ++) {
-            listValues.add("Android");
-            listValues.add("iOS");
-            listValues.add("Symbian");
-            listValues.add("Blackberry");
-            listValues.add("Windows Phone");
+            ADPackageInfo info = new ADPackageInfo();
+
+            info.packageName = ("Android");
+            //listValues.add("iOS");
+            //listValues.add("Symbian");
+            //listValues.add("Blackberry");
+            //listValues.add("Windows Phone");
+
+            listValues.add(info);
         }
         // initiate the listadapter
 
-        myAdapter = new ArrayAdapter <String>(this,
-                R.layout.row_layout, R.id.listText, listValues);
+        //myAdapter = new ArrayAdapter <String>(this, R.layout.row_layout, R.id.listText, listValues);
+        myAdapter = new ADListAdapter(this, listValues);
 
         // assign the list adapter
         setListAdapter(myAdapter);
 
-        myAdapter.setNotifyOnChange(true);
+        //myAdapter.setNotifyOnChange(true);
 
         readPreferences();
 
@@ -113,16 +118,16 @@ public class ADActivityList extends ListActivity
     protected void onListItemClick(ListView list, View view, int position, long id) {
         super.onListItemClick(list, view, position, id);
 
-        String selectedItem = (String) getListView().getItemAtPosition(position);
+        ADPackageInfo selectedItem = listValues.get(position);
 
-        text.setText("You clicked " + selectedItem + " at position " + position);
+        text.setText("You clicked " + selectedItem.packageName + " at position " + position);
 
         if ((mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB ||
                 mListType == ADDownload.ACTION_LIST_SHOW_SECTION_DEB) &&
                 down.getStatus() == AsyncTask.Status.FINISHED) {
 
             mListType = ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB;
-            download.setSearchString(selectedItem);
+            download.setSearchString(selectedItem.packageName);
             down = new DownloadFilesTask();
             down.execute(getDistroURL());
 
@@ -137,10 +142,10 @@ public class ADActivityList extends ListActivity
     }
 
     public void showList() {
-        myAdapter = new ArrayAdapter <String>(mContext,
-                R.layout.row_layout, R.id.listText, listValues);
-        myAdapter.notifyDataSetChanged();
-        myAdapter.setNotifyOnChange(true);
+        //myAdapter = new ArrayAdapter <String>(mContext, R.layout.row_layout, R.id.listText, listValues);
+        myAdapter = new ADListAdapter(this, listValues);
+        //myAdapter.notifyDataSetChanged();
+        //myAdapter.setNotifyOnChange(true);
         setListAdapter(myAdapter);
         //mDateShowing = mDateDownload;
     }
