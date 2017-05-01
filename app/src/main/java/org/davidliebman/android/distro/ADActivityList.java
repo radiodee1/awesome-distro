@@ -31,7 +31,7 @@ public class ADActivityList extends ListActivity
     private ADDownload download = null;
     private DownloadFilesTask down;
     private boolean bool_del_db;
-    private String string_url;
+    private String string_url = "";
 
     private int mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
 
@@ -193,7 +193,8 @@ public class ADActivityList extends ListActivity
     }
 
     public String getDistroURL() {
-        if (!string_url.isEmpty()) {
+        if (string_url != null && !string_url.isEmpty()) {
+
             return string_url;
         }
 
@@ -217,6 +218,11 @@ public class ADActivityList extends ListActivity
                 string_url = data.getStringExtra(ADActivityConfig.RETURN_URL);
                 bool_del_db = data.getBooleanExtra(ADActivityConfig.RETURN_CLEAR_DB, false);
                 text.setText(getDistroURL());
+                if(string_url != null && ! string_url.isEmpty()) {
+                    mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+                    listValues = new ArrayList<>();
+                    showList();
+                }
 
             }
         }
