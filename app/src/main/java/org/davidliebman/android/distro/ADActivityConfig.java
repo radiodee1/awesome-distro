@@ -1,16 +1,25 @@
 package org.davidliebman.android.distro;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.TextView;
+
+import java.net.URL;
 
 public class ADActivityConfig extends AppCompatActivity
         implements AdapterView.OnItemSelectedListener{
@@ -18,11 +27,32 @@ public class ADActivityConfig extends AppCompatActivity
     View debian_layout;
     View ubuntu_layout;
 
-    String string_arch;
-    String string_base_url;
-    String string_release;
-    String string_mcnf;
-    String string_distro;
+    String string_arch_deb;
+    String string_base_url_deb;
+    String string_release_deb;
+    String string_mcnf_deb;
+    String string_distro_deb;
+
+
+    String string_arch_ubu;
+    String string_base_url_ubu;
+    String string_release_ubu;
+    String string_mcnf_ubu;
+    String string_distro_ubu;
+    String string_full_url;
+
+    String string_distro = "debian";
+
+    boolean clear_db_on_exit = false;
+    boolean confirm_url_change = false;
+
+    public static final  String URLSLASH = "/";
+    public static final  String RETURN_URL = "url";
+    public static final  String RETURN_CLEAR_DB = "db";
+
+    EditText text_custom_release = null;
+    TextView text_view_url = null;
+    //String string_custom_release = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +65,7 @@ public class ADActivityConfig extends AppCompatActivity
 
         RadioButton radioButton = (RadioButton) findViewById(R.id.radio_deb);
         radioButton.setChecked(true);
+        string_distro = "debian";
 
         debian_layout = findViewById(R.id.layout_debian);
         ubuntu_layout = findViewById(R.id.layout_ubuntu);
@@ -115,13 +146,41 @@ public class ADActivityConfig extends AppCompatActivity
         spinner8.setAdapter(adapter8);
         spinner8.setOnItemSelectedListener( this );
 
+        text_custom_release = (EditText) findViewById(R.id.text_custom_release);
+        text_custom_release.setVisibility(View.INVISIBLE);
+
+        text_custom_release.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                buildUrl();
+            }
+        });
+
+        text_view_url = (TextView) findViewById(R.id.text_show_url);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+
+                if (!confirm_url_change) string_full_url = "";
+                Intent resultIntent = new Intent();
+                resultIntent.putExtra(RETURN_URL, string_full_url);
+                resultIntent.putExtra(RETURN_CLEAR_DB, clear_db_on_exit);
+                setResult(Activity.RESULT_OK, resultIntent);
+                finish();
+
             }
         });
     }
@@ -136,6 +195,7 @@ public class ADActivityConfig extends AppCompatActivity
                     debian_layout.setVisibility(View.VISIBLE);
                     ubuntu_layout.setVisibility(View.GONE);
                     string_distro = "debian";
+
                 }
                 break;
             case R.id.radio_ubu:
@@ -143,8 +203,48 @@ public class ADActivityConfig extends AppCompatActivity
                     debian_layout.setVisibility(View.GONE);
                     ubuntu_layout.setVisibility(View.VISIBLE);
                     string_distro = "ubuntu";
+
                 }
                 break;
+        }
+        buildUrl();
+    }
+
+
+
+    public void onCheckboxClick(View view) {
+        // Is the view now checked?
+        boolean checked = ((CheckBox) view).isChecked();
+
+        // Check which checkbox was clicked
+        switch(view.getId()) {
+            case R.id.checkbox_custom_release:
+                if (checked) {
+                    text_custom_release.setVisibility(View.VISIBLE);
+                    buildUrl();
+                }
+                else {
+                    text_custom_release.setVisibility(View.INVISIBLE);
+                    buildUrl();
+                }
+                break;
+            case R.id.checkbox_clear_db:
+                if (checked) {
+                    clear_db_on_exit = true;
+                }
+                else {
+                    clear_db_on_exit = false;
+                }
+                break;
+            case R.id.checkbox_confirm:
+                if (checked) {
+                    confirm_url_change = true;
+                }
+                else {
+                    confirm_url_change = false;
+                }
+                break;
+
         }
     }
 
@@ -152,34 +252,79 @@ public class ADActivityConfig extends AppCompatActivity
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         switch (parent.getId()) {
             case R.id.spinner_arch_deb:
-                string_arch = (String) parent.getItemAtPosition(position);
+                string_arch_deb = (String) parent.getItemAtPosition(position);
                 break;
             case R.id.spinner_arch_ubu:
-                string_arch = (String) parent.getItemAtPosition(position);
+                string_arch_ubu = (String) parent.getItemAtPosition(position);
                 break;
             case R.id.spinner_base_url_deb:
-                string_base_url = (String) parent.getItemAtPosition(position);
+                string_base_url_deb = (String) parent.getItemAtPosition(position);
                 break;
             case R.id.spinner_base_url_ubu:
-                string_base_url = (String) parent.getItemAtPosition(position);
+                string_base_url_ubu = (String) parent.getItemAtPosition(position);
                 break;
             case R.id.spinner_release_deb:
-                string_release = (String) parent.getItemAtPosition(position);
+                string_release_deb = (String) parent.getItemAtPosition(position);
                 break;
             case R.id.spinner_release_ubu:
-                string_release = (String) parent.getItemAtPosition(position);
+                string_release_ubu = (String) parent.getItemAtPosition(position);
                 break;
             case R.id.spinner_mcnf_deb:
-                string_mcnf = (String) parent.getItemAtPosition(position);
+                string_mcnf_deb = (String) parent.getItemAtPosition(position);
                 break;
             case R.id.spinner_mcnf_ubu:
-                string_mcnf = (String) parent.getItemAtPosition(position);
+                string_mcnf_ubu = (String) parent.getItemAtPosition(position);
                 break;
         }
+        buildUrl();
     }
+
+    public void stringsFromSpinnerId(int in) {
+
+
+    }
+
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    public void buildUrl() {
+        String release_ubu = "";
+        String release_deb = "";
+        if (text_custom_release.getVisibility() == View.VISIBLE &&
+                !text_custom_release.getText().toString().isEmpty()) {
+            release_ubu = text_custom_release.getText().toString().trim();
+            release_deb = text_custom_release.getText().toString().trim();
+
+        }
+        else {
+            release_deb = string_release_deb;
+            release_ubu = string_release_ubu;
+        }
+
+
+        if (string_distro.contentEquals("debian")) {
+            string_full_url = string_base_url_deb + URLSLASH +
+                    string_distro + URLSLASH +
+                    "dists" + URLSLASH +
+                    release_deb + URLSLASH +
+                    string_mcnf_deb + URLSLASH +
+                    string_arch_deb + URLSLASH +
+                    "Packages.gz";
+        }
+        else if (string_distro.contentEquals("ubuntu")) {
+            string_full_url = string_base_url_ubu + URLSLASH +
+                    string_distro + URLSLASH +
+                    "dists" + URLSLASH +
+                    release_ubu + URLSLASH +
+                    string_mcnf_ubu + URLSLASH +
+                    string_arch_ubu + URLSLASH +
+                    "Packages.gz";
+        }
+        text_view_url.setText(string_full_url);
+
 
     }
 }

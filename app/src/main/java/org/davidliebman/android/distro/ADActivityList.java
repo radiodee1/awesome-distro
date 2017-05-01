@@ -30,11 +30,15 @@ public class ADActivityList extends ListActivity
     private Context mContext;
     private ADDownload download = null;
     private DownloadFilesTask down;
+    private boolean bool_del_db;
+    private String string_url;
 
     private int mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
 
     public static final String PREFERENCES_FILE_KEY = "awesome_distro";
     public static final String PREFERENCES_DATE_OLD_KEY = "long_old_date";
+
+    public static final int INTENT_CONFIGURE = 9001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,13 +187,16 @@ public class ADActivityList extends ListActivity
             myAdapter = new ADListAdapter(this, listValues);
 
         }
-
-
-        //myAdapter = new ADListAdapter(this, listValues);
         setListAdapter(myAdapter);
+
+        text.setText(getDistroURL());
     }
 
     public String getDistroURL() {
+        if (!string_url.isEmpty()) {
+            return string_url;
+        }
+
         return "http://http.us.debian.org/debian/dists/testing/main/binary-amd64/" +"Packages.gz"; //+ "Release";
     }
 
@@ -197,6 +204,22 @@ public class ADActivityList extends ListActivity
     protected void onDestroy() {
         download.onDestroy();
         super.onDestroy();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Check which request we're responding to
+        if (requestCode == INTENT_CONFIGURE) {
+            // Make sure the request was successful
+            if (resultCode == RESULT_OK) {
+                // The user picked a contact.
+                // The Intent's data Uri identifies which contact was selected.
+                string_url = data.getStringExtra(ADActivityConfig.RETURN_URL);
+                bool_del_db = data.getBooleanExtra(ADActivityConfig.RETURN_CLEAR_DB, false);
+                text.setText(getDistroURL());
+
+            }
+        }
     }
 
     @Override
@@ -219,13 +242,15 @@ public class ADActivityList extends ListActivity
         // configure
 
         Intent config = new Intent(this, ADActivityConfig.class);
-        startActivity(config);
-
+        //startActivity(config);
+        startActivityForResult(config, INTENT_CONFIGURE);
+        /*
         if (down == null || down.getStatus() == AsyncTask.Status.FINISHED) {
             mListType = ADDownload.ACTION_ACT_AS_UPDATE;
             down = new DownloadFilesTask();
             down.execute(getDistroURL());
         }
+        */
     }
 
     public void writePreferences() {
