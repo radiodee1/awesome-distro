@@ -2,6 +2,7 @@ package org.davidliebman.android.distro;
 
 import android.app.DialogFragment;
 import android.app.ListActivity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,8 +39,12 @@ public class ADActivityList extends ListActivity
 
     public static final String PREFERENCES_FILE_KEY = "awesome_distro";
     public static final String PREFERENCES_DATE_OLD_KEY = "long_old_date";
+    public static final String PREFERENCES_URL_KEY = "string_url";
 
     public static final int INTENT_CONFIGURE = 9001;
+
+    public static final int WRITE_PREFERENCES_ALL = 1;
+    public static final int WRITE_PREFERENCES_URL = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -194,10 +200,8 @@ public class ADActivityList extends ListActivity
 
     public String getDistroURL() {
         if (string_url != null && !string_url.isEmpty()) {
-
             return string_url;
         }
-
         return "http://http.us.debian.org/debian/dists/testing/main/binary-amd64/" +"Packages.gz"; //+ "Release";
     }
 
@@ -210,6 +214,7 @@ public class ADActivityList extends ListActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
+        boolean bool_do_as_upgrade = false;
         if (requestCode == INTENT_CONFIGURE) {
             // Make sure the request was successful
             if (resultCode == RESULT_OK) {
@@ -217,11 +222,21 @@ public class ADActivityList extends ListActivity
                 // The Intent's data Uri identifies which contact was selected.
                 string_url = data.getStringExtra(ADActivityConfig.RETURN_URL);
                 bool_del_db = data.getBooleanExtra(ADActivityConfig.RETURN_CLEAR_DB, false);
+                bool_do_as_upgrade = data.getBooleanExtra(ADActivityConfig.RETURN_AS_UPGRADE,false);
                 text.setText(getDistroURL());
                 if(string_url != null && ! string_url.isEmpty()) {
+                    writePreferences(WRITE_PREFERENCES_URL);
+
                     mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+                    download = null;
                     listValues = new ArrayList<>();
                     showList();
+                }
+
+                if ((down == null || down.getStatus() == AsyncTask.Status.FINISHED) && bool_do_as_upgrade) {
+                    mListType = ADDownload.ACTION_ACT_AS_UPDATE;
+                    down = new DownloadFilesTask();
+                    down.execute(getDistroURL());
                 }
 
             }
@@ -250,21 +265,18 @@ public class ADActivityList extends ListActivity
         Intent config = new Intent(this, ADActivityConfig.class);
         //startActivity(config);
         startActivityForResult(config, INTENT_CONFIGURE);
-        /*
-        if (down == null || down.getStatus() == AsyncTask.Status.FINISHED) {
-            mListType = ADDownload.ACTION_ACT_AS_UPDATE;
-            down = new DownloadFilesTask();
-            down.execute(getDistroURL());
-        }
-        */
+
     }
 
-    public void writePreferences() {
+    public void writePreferences(int write) {
         //Context context = getActivity();
         SharedPreferences sharedPref = mContext.getSharedPreferences(
                 PREFERENCES_FILE_KEY, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putLong(PREFERENCES_DATE_OLD_KEY, mDateDownload);
+        if (write == WRITE_PREFERENCES_ALL) {
+            editor.putLong(PREFERENCES_DATE_OLD_KEY, mDateDownload);
+        }
+        editor.putString(PREFERENCES_URL_KEY, string_url);
         editor.commit();
 
     }
@@ -273,12 +285,23 @@ public class ADActivityList extends ListActivity
         SharedPreferences sharedPref = mContext.getSharedPreferences(
                 PREFERENCES_FILE_KEY, Context.MODE_PRIVATE);
         mDateOld = sharedPref.getLong(PREFERENCES_DATE_OLD_KEY, 0);
+        string_url = sharedPref.getString(PREFERENCES_URL_KEY, "");
         System.out.println("date from preferences " + new Date(mDateOld));
     }
 
     ////////////////////////////////////////
 
     private class DownloadFilesTask extends AsyncTask<String, Void, Void> {
+
+        ProgressDialog progressBar = new ProgressDialog(ADActivityList.this);
+
+        public DownloadFilesTask() {
+            if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB) {
+                progressBar.setMessage("Please wait");
+                progressBar.show();
+                progressBar.setIndeterminate(true);
+            }
+        }
 
         @Override
         protected void onProgressUpdate(Void... progress) {
@@ -346,7 +369,7 @@ public class ADActivityList extends ListActivity
                     download.setAsUpdate(mContext);
                     //listValues = download.getDBList(mContext, mListType, mDateOld);
                     listValues = new ArrayList<>();
-                    writePreferences();
+                    writePreferences(WRITE_PREFERENCES_ALL);
                     break;
                 case ADDownload.ACTION_ADD_PACKAGE:
                     if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
@@ -367,7 +390,7 @@ public class ADActivityList extends ListActivity
 
         @Override
         protected void onPostExecute(Void result) {
-
+            progressBar.hide();
             if (mListType == ADDownload.ACTION_REMOVE_PACKAGE || mListType == ADDownload.ACTION_ADD_PACKAGE) {
                 mListType = ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB;
             }

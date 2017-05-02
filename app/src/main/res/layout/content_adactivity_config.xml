@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="20dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="org.davidliebman.android.distro.ADActivityConfig"
     tools:showIn="@layout/activity_adconfig">
@@ -156,6 +157,7 @@
         </LinearLayout>
 
         <!-- universal options -->
+        <View style="@style/Seperator" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -181,26 +183,27 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="url" />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <CheckBox
-                android:id="@+id/checkbox_clear_db"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:onClick="onCheckboxClick"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Clear DB on EXIT"/>
-        </LinearLayout>
 
+        <CheckBox
+            android:id="@+id/checkbox_clear_db"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="onCheckboxClick"
+            android:text="Clear DB on Exit"/>
+
+
+        <CheckBox
+            android:id="@+id/checkbox_as_upgrade"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Incorporate Results As Upgrade"
+            android:onClick="onCheckboxClick"/>
         <CheckBox
             android:id="@+id/checkbox_confirm"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Confirm Change URL"
             android:onClick="onCheckboxClick"/>
+
     </LinearLayout>
 </android.support.constraint.ConstraintLayout>

@@ -45,10 +45,12 @@ public class ADActivityConfig extends AppCompatActivity
 
     boolean clear_db_on_exit = false;
     boolean confirm_url_change = false;
+    boolean confirm_as_upgrade = false;
 
     public static final  String URLSLASH = "/";
     public static final  String RETURN_URL = "url";
     public static final  String RETURN_CLEAR_DB = "db";
+    public static final  String RETURN_AS_UPGRADE = "upgrade";
 
     EditText text_custom_release = null;
     TextView text_view_url = null;
@@ -178,6 +180,7 @@ public class ADActivityConfig extends AppCompatActivity
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra(RETURN_URL, string_full_url);
                 resultIntent.putExtra(RETURN_CLEAR_DB, clear_db_on_exit);
+                resultIntent.putExtra(RETURN_AS_UPGRADE, confirm_as_upgrade);
                 setResult(Activity.RESULT_OK, resultIntent);
                 finish();
 
@@ -242,6 +245,14 @@ public class ADActivityConfig extends AppCompatActivity
                 }
                 else {
                     confirm_url_change = false;
+                }
+                break;
+            case R.id.checkbox_as_upgrade:
+                if (checked) {
+                    confirm_as_upgrade = true;
+                }
+                else {
+                    confirm_as_upgrade = false;
                 }
                 break;
 

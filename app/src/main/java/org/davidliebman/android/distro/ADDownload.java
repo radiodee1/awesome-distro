@@ -76,12 +76,6 @@ public class ADDownload {
         downloadDate(mUrl);
         System.out.println("date from download " + new Date(mDateDownload));
 
-
-        if (mDateOld > mDateDownload || mDateOld == 0) {
-            // list is newest list available
-            //action = ACTION_FILE_NO_DOWNLOAD;
-        }
-
         switch (action) {
             case ACTION_GZIP_FILE_SHOW_ALL:
                 mList = downloadGzipFile(mUrl);
@@ -250,7 +244,6 @@ public class ADDownload {
             URL distro = new URL(url);
             URLConnection con = distro.openConnection();
 
-            //ByteArrayInputStream bais = new ByteArrayInputStream(responseBytes);
             GZIPInputStream gzis = new GZIPInputStream(con.getInputStream());
             InputStreamReader reader = new InputStreamReader(gzis);
             BufferedReader in = new BufferedReader(reader);
