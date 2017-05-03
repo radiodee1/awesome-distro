@@ -50,6 +50,7 @@ public class ADDownload {
     public static final int ACTION_ACT_AS_UPDATE = 10;
     public static final int ACTION_ADD_PACKAGE = 11;
     public static final int ACTION_REMOVE_PACKAGE = 12;
+    public static final int ACTION_CLEAR_DB = 13;
 
     public static final String STRING_PACKAGE = "Package: ";
     public static final String STRING_VERSION = "Version: ";
@@ -360,7 +361,7 @@ public class ADDownload {
                 if (info.packageName.contentEquals(mPackageList.get(i).packageName) &&
                         !info.packageVersion.contentEquals(mPackageList.get(i).packageVersion)) {
                     mDBList.add(info);
-                    System.out.println(info);
+                    System.out.println("check update ---- " + info);
 
                 }
             }
@@ -402,10 +403,13 @@ public class ADDownload {
     }
 
     public void deleteDB(Context context) {
-         String SQL_DELETE_ENTRIES =
-                "DROP TABLE IF EXISTS " + Entry.TABLE_NAME;
+        if (mDbHelper == null) {
+            mDbHelper = new PackageDbHelper(context);
+        }
+        String SQL_DELETE_ENTRIES = "DELETE FROM " + Entry.TABLE_NAME +" ;";
         SQLiteDatabase db = mDbHelper.getWritableDatabase();
-        db.rawQuery(SQL_DELETE_ENTRIES, null);
+        db.execSQL(SQL_DELETE_ENTRIES);
+        //System.out.println("delete database here -------------------");
 
     }
 
@@ -428,6 +432,7 @@ public class ADDownload {
 
         // Define a projection that specifies which columns from the database
         // you will actually use after this query.
+        /*
         String[] projection = {
                 Entry._ID,
                 Entry.COLUMN_NAME_NAME,
@@ -436,6 +441,7 @@ public class ADDownload {
                 Entry.COLUMN_NAME_VERSION,
                 Entry.COLUMN_NAME_DATE
         };
+        */
 
         String mRawQuery = "SELECT * FROM " + Entry.TABLE_NAME ;
 

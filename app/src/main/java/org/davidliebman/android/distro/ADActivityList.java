@@ -78,6 +78,7 @@ public class ADActivityList extends ListActivity
         //myAdapter.setNotifyOnChange(true);
 
         readPreferences();
+        text.setText(getDistroURL());
 
         Button checkButton = (Button) findViewById(R.id.main_button);
         checkButton.setOnClickListener(new View.OnClickListener() {
@@ -212,6 +213,15 @@ public class ADActivityList extends ListActivity
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        //finish();
+        down = null;
+        listValues = new ArrayList<>();
+        mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
         boolean bool_do_as_upgrade = false;
@@ -238,7 +248,11 @@ public class ADActivityList extends ListActivity
                     down = new DownloadFilesTask();
                     down.execute(getDistroURL());
                 }
-
+                if ((down == null || down.getStatus() == AsyncTask.Status.FINISHED) && bool_del_db) {
+                    mListType = ADDownload.ACTION_CLEAR_DB;
+                    down = new DownloadFilesTask();
+                    down.execute(getDistroURL());
+                }
             }
         }
     }
@@ -273,7 +287,7 @@ public class ADActivityList extends ListActivity
         SharedPreferences sharedPref = mContext.getSharedPreferences(
                 PREFERENCES_FILE_KEY, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        if (write == WRITE_PREFERENCES_ALL) {
+        if (write == WRITE_PREFERENCES_ALL && mDateDownload != 0) {
             editor.putLong(PREFERENCES_DATE_OLD_KEY, mDateDownload);
         }
         editor.putString(PREFERENCES_URL_KEY, string_url);
@@ -296,7 +310,9 @@ public class ADActivityList extends ListActivity
         ProgressDialog progressBar = new ProgressDialog(ADActivityList.this);
 
         public DownloadFilesTask() {
-            if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB) {
+            if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB ||
+                    mListType == ADDownload.ACTION_LIST_UPDATE_PACKAGE_DEB ||
+                    mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_DEB) {
                 progressBar.setMessage("Please wait");
                 progressBar.show();
                 progressBar.setIndeterminate(true);
@@ -382,6 +398,10 @@ public class ADActivityList extends ListActivity
                     int remove = Integer.parseInt(params[1]);
                     download.removePackage(mContext, listValues.get(remove));
                     //mListType = ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB;
+                    break;
+                case ADDownload.ACTION_CLEAR_DB:
+                    if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
+                    download.deleteDB(ADActivityList.this);
                     break;
             }
 
