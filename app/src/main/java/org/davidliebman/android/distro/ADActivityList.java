@@ -26,6 +26,7 @@ public class ADActivityList extends ListActivity
     private long mDateDownload = 0;
     private long mDateShowing = 0;
     private TextView text;
+    private TextView date;
     private ArrayList<ADPackageInfo> listValues;
     //private ArrayAdapter<String> myAdapter;
     private ADListAdapter myAdapter;
@@ -53,32 +54,25 @@ public class ADActivityList extends ListActivity
         mContext = this;
 
         text = (TextView) findViewById(R.id.mainText);
+        date = (TextView) findViewById(R.id.textview_date);
 
         listValues = new ArrayList<ADPackageInfo>();
 
         for(int i = 0; i < 1 ; i ++) {
             ADPackageInfo info = new ADPackageInfo();
 
-            info.packageName = ("Android");
-            //listValues.add("iOS");
-            //listValues.add("Symbian");
-            //listValues.add("Blackberry");
-            //listValues.add("Windows Phone");
+            info.packageName = ("Debian Distro Watcher");
 
             listValues.add(info);
         }
-        // initiate the listadapter
 
-        //myAdapter = new ArrayAdapter <String>(this, R.layout.row_layout, R.id.listText, listValues);
         myAdapter = new ADListAdapter(this, listValues);
 
-        // assign the list adapter
         setListAdapter(myAdapter);
-
-        //myAdapter.setNotifyOnChange(true);
 
         readPreferences();
         text.setText(getDistroURL());
+        date.setText(new Date(mDateDownload).toString());
 
         Button checkButton = (Button) findViewById(R.id.main_button);
         checkButton.setOnClickListener(new View.OnClickListener() {
@@ -103,13 +97,7 @@ public class ADActivityList extends ListActivity
                     down = new DownloadFilesTask();
                     down.execute(getDistroURL());
                 }
-                /*
-                else if (mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_DEB) {
-                    mListType = ADDownload.ACTION_LIST_UPDATE_PACKAGE_DEB;
-                    down = new DownloadFilesTask();
-                    down.execute(getDistroURL());
-                }
-                */
+
                 else if (mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB) {
                     mListType = ADDownload.ACTION_LIST_SHOW_SECTION_DEB;
                     down = new DownloadFilesTask();
@@ -132,10 +120,11 @@ public class ADActivityList extends ListActivity
 
         ADPackageInfo selectedItem = listValues.get(position);
 
-        text.setText("You clicked " + selectedItem.packageName + " at position " + position);
+        //text.setText("You clicked " + selectedItem.packageName + " at position " + position);
 
         if ((mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB ||
                 mListType == ADDownload.ACTION_LIST_SHOW_SECTION_DEB) &&
+                down != null &&
                 down.getStatus() == AsyncTask.Status.FINISHED) {
 
             mListType = ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB;
@@ -148,6 +137,7 @@ public class ADActivityList extends ListActivity
         }
         else if ((mListType == ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB ||
                 mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB) &&
+                down != null &&
                 down.getStatus() == AsyncTask.Status.FINISHED) {
             boolean test = selectedItem.packageIsNew;
             listValues.get(position).packageIsNew = ! test;
@@ -173,6 +163,9 @@ public class ADActivityList extends ListActivity
                 down.execute(getDistroURL(), Integer.toString(position));
             }
         }
+        else if(selectedItem == null || true) {
+            //do nothing... simple list
+        }
 
 
     }
@@ -197,6 +190,7 @@ public class ADActivityList extends ListActivity
         setListAdapter(myAdapter);
 
         text.setText(getDistroURL());
+        date.setText(new Date(mDateDownload).toString());
     }
 
     public String getDistroURL() {
@@ -234,6 +228,10 @@ public class ADActivityList extends ListActivity
                 bool_del_db = data.getBooleanExtra(ADActivityConfig.RETURN_CLEAR_DB, false);
                 bool_do_as_upgrade = data.getBooleanExtra(ADActivityConfig.RETURN_AS_UPGRADE,false);
                 text.setText(getDistroURL());
+
+                listValues = new ArrayList<>();
+                mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+
                 if(string_url != null && ! string_url.isEmpty()) {
                     writePreferences(WRITE_PREFERENCES_URL);
 
@@ -253,6 +251,7 @@ public class ADActivityList extends ListActivity
                     down = new DownloadFilesTask();
                     down.execute(getDistroURL());
                 }
+                showList();
             }
         }
     }
