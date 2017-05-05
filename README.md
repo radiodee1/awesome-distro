@@ -3,7 +3,7 @@ debian style distro watching
 
 README TEXT:
 
-Instructions (short version):\n
+Instructions (short version):
 
 1. Start App
 2. Configure URL of Distro on Configure page
