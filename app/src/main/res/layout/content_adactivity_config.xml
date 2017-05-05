@@ -1,21 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="20dp"
+    android:layout_margin="50dp"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="org.davidliebman.android.distro.ADActivityConfig"
     tools:showIn="@layout/activity_adconfig">
 
     <LinearLayout
-        android:layout_width="368dp"
-        android:layout_height="495dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_margin="200dp"
         tools:layout_editor_absoluteY="8dp"
         tools:layout_editor_absoluteX="8dp">
+
+        <View style="@style/Seperator" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="URL Configure:"
+            android:textSize="@dimen/config_header_text_size"
+            android:textColor="@color/colorPrimaryDark"/>
 
         <!-- select deb or ubu -->
         <LinearLayout
@@ -157,7 +165,6 @@
         </LinearLayout>
 
         <!-- universal options -->
-        <View style="@style/Seperator" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -184,6 +191,19 @@
             android:layout_height="wrap_content"
             android:text="url" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="50dp" />
+
+        <View style="@style/Seperator" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="App Configure:"
+            android:textColor="@color/colorPrimaryDark"
+            android:textSize="@dimen/config_header_text_size"/>
+
         <CheckBox
             android:id="@+id/checkbox_clear_db"
             android:layout_width="wrap_content"
@@ -205,5 +225,11 @@
             android:text="Confirm Change URL"
             android:onClick="onCheckboxClick"/>
 
+        <Button
+            android:id="@+id/button_readme"
+            android:visibility="visible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="README"/>
     </LinearLayout>
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>

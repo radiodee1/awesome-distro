@@ -2,7 +2,7 @@
 
 
 <resources>
-
+    <dimen name="config_header_text_size">20sp</dimen>
     <dimen name="activity_vertical_margin">15dp</dimen>
     <dimen name="activity_horizontal_margin">15dp</dimen>
 </resources>

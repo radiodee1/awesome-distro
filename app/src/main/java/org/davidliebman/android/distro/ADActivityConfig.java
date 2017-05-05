@@ -12,6 +12,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.RadioButton;
@@ -54,7 +55,7 @@ public class ADActivityConfig extends AppCompatActivity
 
     EditText text_custom_release = null;
     TextView text_view_url = null;
-    //String string_custom_release = "";
+    Button button_readme = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,6 +171,14 @@ public class ADActivityConfig extends AppCompatActivity
 
         text_view_url = (TextView) findViewById(R.id.text_show_url);
 
+        button_readme = (Button) findViewById(R.id.button_readme);
+        button_readme.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(ADActivityConfig.this,ADActivityReadme.class);
+                startActivity(intent);
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

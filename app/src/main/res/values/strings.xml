@@ -126,4 +126,21 @@
 
     <!-- end config spinner strings -->
 
+    <string name="text_readme">README TEXT:\n
+    \nInstructions (short version):\n
+    \n 1. Start App
+    \n 2. Configure URL of Distro on Configure page
+    \n 3. Confirm URL Change and Click Pink \'go\' button
+    \n 4. Browse Repository (\'BROWSE\' button on main page)
+    \n 5. Click on files for tracking (checkbox will turn green when file is selected)
+    \n 6. LATER: click on \'CONFIGURE\' and \'CHECK DISTRO\' to see if updates for your files are available.\n
+
+    \nNOTES: The program just keeps one list of files for tracking, so if you switch the url you may
+        still get notification that your package is new even though you selected it when another url
+        was being used.\n
+    \n\'CHECK DISTRO\' typically will not work immediately after URL is set. It will take some time
+        for the distro developers to update the package repository. Then the \'CHECK DISTRO\' button
+        will work. Be patient.
+
+    </string>
 </resources>

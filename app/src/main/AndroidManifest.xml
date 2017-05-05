@@ -12,9 +12,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ADActivityList"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation">
+        <activity
+            android:name=".ADActivityList"
+            android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -23,10 +24,12 @@
         </activity>
         <activity
             android:name=".ADActivityConfig"
-            android:label="@string/title_activity_adconfig"
-            android:theme="@style/AppTheme.NoActionBar"
             android:configChanges="orientation"
-            android:screenOrientation="portrait"/>
+            android:label="@string/title_activity_adconfig"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name=".ADActivityReadme"></activity>
     </application>
 
 </manifest>
