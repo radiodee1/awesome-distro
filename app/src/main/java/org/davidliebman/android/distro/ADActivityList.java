@@ -113,6 +113,13 @@ public class ADActivityList extends ListActivity
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        readPreferences();
+        text.setText(getDistroURL());
+    }
+
     // when an item of the list is clicked
     @Override
     protected void onListItemClick(ListView list, View view, int position, long id) {

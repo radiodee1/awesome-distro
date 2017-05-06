@@ -69,9 +69,9 @@ public class ADListAdapter extends BaseAdapter {
         View vi=convertView;
         if(convertView==null) vi = inflater.inflate(R.layout.row_layout_complex, null);
 
-        TextView title = (TextView)vi.findViewById(R.id.title); // title
-        TextView artist = (TextView)vi.findViewById(R.id.artist); // artist name
-        TextView duration = (TextView)vi.findViewById(R.id.duration); // duration
+        TextView name = (TextView)vi.findViewById(R.id.name); // title
+        TextView version = (TextView)vi.findViewById(R.id.version); // artist name
+        TextView section = (TextView)vi.findViewById(R.id.section); // duration
         ImageView thumb_image_check = (ImageView)vi.findViewById(R.id.list_image_check); // thumb image
         ImageView thumb_image_uncheck = (ImageView) vi.findViewById(R.id.list_image_uncheck);
 
@@ -79,9 +79,9 @@ public class ADListAdapter extends BaseAdapter {
         if (data != null ) info = data.get(position);
         else info = new ADPackageInfo();
 
-        title.setText(info.packageName);//song.get(CustomizedListView.KEY_TITLE));
-        artist.setText(info.packageVersion);//song.get(CustomizedListView.KEY_ARTIST));
-        duration.setText(info.packageSection);//song.get(CustomizedListView.KEY_DURATION));
+        name.setText(info.packageName);//song.get(CustomizedListView.KEY_TITLE));
+        version.setText(info.packageVersion);//song.get(CustomizedListView.KEY_ARTIST));
+        section.setText(info.packageSection);//song.get(CustomizedListView.KEY_DURATION));
         //imageLoader.DisplayImage(song.get(CustomizedListView.KEY_THUMB_URL), thumb_image);
 
         if (info.packageIsNew) {
