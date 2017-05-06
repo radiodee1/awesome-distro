@@ -1,20 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- ScrollView
+    android:layout_height="wrap_content"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:tools="http://schemas.android.com/tools" -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="50dp"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="org.davidliebman.android.distro.ADActivityConfig"
-    tools:showIn="@layout/activity_adconfig">
+    >
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        tools:layout_editor_absoluteY="8dp"
-        tools:layout_editor_absoluteX="8dp">
+        android:layout_margin="50dp"
+        >
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="50dp" />
 
         <View style="@style/Seperator" />
 
@@ -197,39 +203,48 @@
 
         <View style="@style/Seperator" />
 
-        <TextView
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="App Configure:"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="@dimen/config_header_text_size"/>
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="App Configure:"
+                android:textColor="@color/colorPrimaryDark"
+                android:textSize="@dimen/config_header_text_size"/>
 
-        <CheckBox
-            android:id="@+id/checkbox_clear_db"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:onClick="onCheckboxClick"
-            android:text="Clear DB on Exit"/>
+            <CheckBox
+                android:id="@+id/checkbox_clear_db"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="onCheckboxClick"
+                android:text="Clear DB on Exit"/>
 
 
-        <CheckBox
-            android:id="@+id/checkbox_as_upgrade"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Incorporate Results As Upgrade"
-            android:onClick="onCheckboxClick"/>
-        <CheckBox
-            android:id="@+id/checkbox_confirm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Confirm Change URL"
-            android:onClick="onCheckboxClick"/>
+            <CheckBox
+                android:id="@+id/checkbox_as_upgrade"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Incorporate Results As Upgrade"
+                android:onClick="onCheckboxClick"/>
+            <CheckBox
+                android:id="@+id/checkbox_confirm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Confirm Change URL"
+                android:onClick="onCheckboxClick"/>
 
-        <Button
-            android:id="@+id/button_readme"
-            android:visibility="visible"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="README"/>
+            <Button
+                android:id="@+id/button_readme"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="README"/>
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="100dp"/>
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>
+<!-- /ScrollView -->
