@@ -1,5 +1,11 @@
 # awesome-distro
-debian style distro watching
+Debian Distro Watch - debian style distro watching
+
+APP-STORE TEXT:
+
+This app does not install Linux on your phone. Instead it lets you know when updates are available for your computer’s Linux install.
+
+Have you installed Linux? Are you using an operating system like Debian or Ubuntu? Would you like to know when your favorite program is ready to update… Even before you start up your computer? Now you can use this app to watch your favorite distro when it updates packages! 
 
 README TEXT:
 
