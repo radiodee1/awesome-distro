@@ -1,5 +1,5 @@
 # awesome-distro
-Debian Distro Watch - debian style distro watching
+Awesome Distro Watch - debian style distro watching
 
 APP-STORE TEXT:
 

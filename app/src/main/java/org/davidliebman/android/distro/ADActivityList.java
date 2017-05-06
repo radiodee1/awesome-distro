@@ -61,7 +61,7 @@ public class ADActivityList extends ListActivity
         for(int i = 0; i < 1 ; i ++) {
             ADPackageInfo info = new ADPackageInfo();
 
-            info.packageName = ("Debian Distro Watcher");
+            info.packageName = ("Awesome Distro Watcher");
 
             listValues.add(info);
         }
