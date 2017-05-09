@@ -80,10 +80,10 @@
 
     <!-- config spinner strings -->
     <string-array name="spinner_base_url_deb">
-        <item>http://http.us.debian.org</item>
-        <item>http://debian-multimedia.org</item>
+        <item>http://http.us.debian.org/debian</item>
+        <item>http://deb-multimedia.org</item>
         <item>http://security.debian.org</item>
-        <item>http://ftp.debian.org</item>
+        <item>http://ftp.debian.org/debian</item>
     </string-array>
 
     <string-array name="spinner_base_url_ubu">

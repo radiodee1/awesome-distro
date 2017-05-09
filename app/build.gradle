@@ -7,8 +7,8 @@ android {
         applicationId "org.davidliebman.android.distro"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 3
-        versionName "1.0.0.20170508"
+        versionCode 4
+        versionName "1.0.0.20170509"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }

@@ -21,6 +21,9 @@
                 android:text="@string/text_readme"
                 android:textColor="#000000"
                 android:textSize="@dimen/config_header_text_size"/>
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="200dp" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

@@ -327,7 +327,7 @@ public class ADActivityConfig extends AppCompatActivity
 
         if (string_distro.contentEquals("debian")) {
             string_full_url = string_base_url_deb + URLSLASH +
-                    string_distro + URLSLASH +
+                    //string_distro + URLSLASH +
                     "dists" + URLSLASH +
                     release_deb + URLSLASH +
                     string_mcnf_deb + URLSLASH +
