@@ -126,7 +126,7 @@
 
     <string-array name="spinner_proposed_ubu">
         <item>none</item>
-        <item>-proposed</item>
+        <item>proposed</item>
     </string-array>
 
     <!-- end config spinner strings -->

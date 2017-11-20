@@ -167,6 +167,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
+            <TextView
+                android:id="@+id/text_proposed_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Proposed" />
+
+            <Spinner
+                android:id="@+id/spinner_proposed_ubu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
 
         </LinearLayout>
 

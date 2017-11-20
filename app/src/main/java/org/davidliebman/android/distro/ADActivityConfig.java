@@ -40,6 +40,7 @@ public class ADActivityConfig extends AppCompatActivity
     String string_release_ubu;
     String string_mcnf_ubu;
     String string_distro_ubu;
+    String string_proposed_ubu;
     String string_full_url;
 
     String string_distro = "debian";
@@ -69,6 +70,7 @@ public class ADActivityConfig extends AppCompatActivity
         RadioButton radioButton = (RadioButton) findViewById(R.id.radio_deb);
         radioButton.setChecked(true);
         string_distro = "debian";
+        string_proposed_ubu = "none";
 
         debian_layout = findViewById(R.id.layout_debian);
         ubuntu_layout = findViewById(R.id.layout_ubuntu);
@@ -84,6 +86,7 @@ public class ADActivityConfig extends AppCompatActivity
         Spinner spinner6 = (Spinner) findViewById(R.id.spinner_arch_ubu);
         Spinner spinner7 = (Spinner) findViewById(R.id.spinner_release_ubu);
         Spinner spinner8 = (Spinner) findViewById(R.id.spinner_mcnf_ubu);
+        Spinner spinner9 = (Spinner) findViewById(R.id.spinner_proposed_ubu);
 
         ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this,
                 R.array.spinner_base_url_deb, android.R.layout.simple_spinner_item);
@@ -148,6 +151,14 @@ public class ADActivityConfig extends AppCompatActivity
         // Apply the adapter to the spinner
         spinner8.setAdapter(adapter8);
         spinner8.setOnItemSelectedListener( this );
+
+        ArrayAdapter<CharSequence> adapter9 = ArrayAdapter.createFromResource(this,
+                R.array.spinner_proposed_ubu, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter9.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner9.setAdapter(adapter9);
+        spinner9.setOnItemSelectedListener( this );
 
         text_custom_release = (EditText) findViewById(R.id.text_custom_release);
         text_custom_release.setVisibility(View.INVISIBLE);
@@ -295,6 +306,9 @@ public class ADActivityConfig extends AppCompatActivity
             case R.id.spinner_mcnf_ubu:
                 string_mcnf_ubu = (String) parent.getItemAtPosition(position);
                 break;
+            case R.id.spinner_proposed_ubu:
+                string_proposed_ubu = (String) parent.getItemAtPosition(position);
+                break;
         }
         buildUrl();
     }
@@ -313,6 +327,7 @@ public class ADActivityConfig extends AppCompatActivity
     public void buildUrl() {
         String release_ubu = "";
         String release_deb = "";
+
         if (text_custom_release.getVisibility() == View.VISIBLE &&
                 !text_custom_release.getText().toString().isEmpty()) {
             release_ubu = text_custom_release.getText().toString().trim();
@@ -324,6 +339,9 @@ public class ADActivityConfig extends AppCompatActivity
             release_ubu = string_release_ubu;
         }
 
+        if ( string_proposed_ubu.equalsIgnoreCase("proposed")) {
+            release_ubu = release_ubu + "-proposed";
+        }
 
         if (string_distro.contentEquals("debian")) {
             string_full_url = string_base_url_deb + URLSLASH +
