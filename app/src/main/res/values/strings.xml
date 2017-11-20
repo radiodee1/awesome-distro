@@ -124,6 +124,11 @@
         <item>universe</item>
     </string-array>
 
+    <string-array name="spinner_proposed_ubu">
+        <item>none</item>
+        <item>-proposed</item>
+    </string-array>
+
     <!-- end config spinner strings -->
 
     <string name="text_readme">
