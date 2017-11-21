@@ -47,9 +47,13 @@ public class ADActivityConfig extends AppCompatActivity
     String string_proposed_ubu;
     String string_full_url;
 
-    String string_arch_fed;
-    String string_release_fed;
+    String string_arch_fed = "";
+    String string_release_fed = "";
+    String string_base_url_fed = "";
 
+    int int_release_fed = 0;
+    int int_arch_fed = 0;
+    int int_base_url_fed = 0;
 
     String string_distro = "debian";
 
@@ -68,8 +72,7 @@ public class ADActivityConfig extends AppCompatActivity
 
     ////// specific to fedora /////
     ArrayList<String> listName = new ArrayList<>();
-    ArrayList<String> listBaseUrl = new ArrayList<>();
-    ArrayList<String> listMetalink = new ArrayList<>();
+    ArrayList<String> listUrl = new ArrayList<>();
     ///////////////////////////////
 
     @Override
@@ -369,9 +372,15 @@ public class ADActivityConfig extends AppCompatActivity
                 break;
             case R.id.spinner_arch_fed:
                 string_arch_fed = (String) parent.getItemAtPosition(position);
+                int_arch_fed = position;
                 break;
             case R.id.spinner_release_fed:
                 string_release_fed = (String) parent.getItemAtPosition(position);
+                int_release_fed = position;
+                break;
+            case R.id.spinner_base_url_fed:
+                string_base_url_fed = (String) parent.getItemAtPosition(position);
+                int_base_url_fed = position;
                 break;
         }
         buildUrl();
@@ -425,6 +434,9 @@ public class ADActivityConfig extends AppCompatActivity
                     string_arch_ubu + URLSLASH +
                     "Packages.gz";
         }
+        else if (string_distro.contentEquals("fedora")) {
+            string_full_url = makeUrlFed(int_base_url_fed);
+        }
         text_view_url.setText(string_full_url);
 
 
@@ -439,8 +451,8 @@ public class ADActivityConfig extends AppCompatActivity
         docs.add(R.raw.fedora_updates_testing_repo);
 
         listName.clear();
-        listBaseUrl.clear();
-        listMetalink.clear();
+        listUrl.clear();
+        //listMetalink.clear();
 
         for (int i = 0; i < docs.size(); i ++) {
             String result;
@@ -456,42 +468,53 @@ public class ADActivityConfig extends AppCompatActivity
                 result = "Error: can't show file.";
             }
 
-            String base = new String();
-            String meta = new String();
+            //String base = new String();
+            String url = new String();
             String name = new String();
 
             String line[] = result.split("\\r?\\n");
             for (int j = 0; j < line.length; j ++) {
                 String fed = line[j];
 
-                System.out.println(fed);
-
                 if(fed.startsWith("baseurl=")) {
-                    base = fed.substring(("baseurl=").length());
-                    meta = "";
+
+                    url = fed;
                 }
                 else if (fed.startsWith("metalink=")) {
-                    meta = fed.substring(("metalink=").length());
-                    base = "";
+
+                    url = fed;
                 }
                 else if (fed.startsWith("name=")) {
                     name = fed.substring(("name=").length());
-                    System.out.println(name + "here");
-                    System.out.println(fed + "here too");
-                }
-                if ((fed.trim().contentEquals("") || fed.startsWith("[")) && !name.isEmpty()) {
-                    listName.add(name);
-                    listBaseUrl.add(base);
-                    listMetalink.add(meta);
+                    String list[] = name.split("[ ]+");
                     name = "";
-                    base = "";
-                    meta = "";
+                    for(int k = 0; k < list.length; k ++) {
+                        if(!list[k].startsWith("$") && !list[k].contentEquals("-")) {
+                            name = name + list[k] + " ";
+                        }
+                    }
+                }
+                if ((j == line.length - 1 || fed.trim().contentEquals("") || fed.startsWith("[")) && !name.isEmpty()) {
+                    listName.add(name);
+                    listUrl.add(url);
+                    name = "";
+                    url = "";
                 }
             }
         }
     }
 
     public String makeUrlFed(int position) {
-        return "";
+        String out = listUrl.get(position);
+        String METALINK = "metalink=";
+        String BASEURL = "baseurl=";
+        String RELEASEVER = "$releasever";
+        String BASEARCH = "$basearch";
+
+        out = out.replace(RELEASEVER, string_release_fed);
+        out = out.replace(BASEARCH, string_arch_fed);
+
+        System.out.println(out + " here");
+        return out;
     }
 }
