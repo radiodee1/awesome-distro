@@ -51,6 +51,14 @@
                     android:onClick="onRadioButtonClick"/>
 
                 <RadioButton
+                    android:id="@+id/radio_fed"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Fedora"
+                    android:onClick="onRadioButtonClick"/>
+
+
+                <RadioButton
                     android:id="@+id/radio_ubu"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -112,6 +120,62 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
+
+        </LinearLayout>
+
+        <!-- fedora options -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/layout_fedora">
+
+            <TextView
+                android:id="@+id/text_name_fed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Fedora"
+                android:visibility="visible" />
+
+            <Spinner
+                android:id="@+id/spinner_base_url_fed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/text_arch_fed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Architecture" />
+
+            <Spinner
+                android:id="@+id/spinner_arch_fed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/text_release_fed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Release" />
+
+            <Spinner
+                android:id="@+id/spinner_release_fed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <!--
+            <TextView
+                android:id="@+id/text_mcnf_fed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Main, etc." />
+
+            <Spinner
+                android:id="@+id/spinner_mcnf_fed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            -->
 
         </LinearLayout>
 

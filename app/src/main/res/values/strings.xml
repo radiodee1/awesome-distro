@@ -101,6 +101,10 @@
         <item>binary-amd64</item>
     </string-array>
 
+    <string-array name="spinner_arch_fed">
+        <item>x86_64</item>
+    </string-array>
+
     <string-array name="spinner_release_deb">
         <item>testing</item>
         <item>sid</item>
@@ -109,6 +113,19 @@
     <string-array name="spinner_release_ubu">
         <item>zesty</item>
         <item>artful</item>
+    </string-array>
+
+    <string-array name="spinner_release_fed">
+        <item>26</item>
+        <item>27</item>
+        <item>28</item>
+        <item>29</item>
+        <item>30</item>
+        <item>31</item>
+        <item>32</item>
+        <item>33</item>
+        <item>34</item>
+        <item>35</item>
     </string-array>
 
     <string-array name="spinner_mcnf_deb">

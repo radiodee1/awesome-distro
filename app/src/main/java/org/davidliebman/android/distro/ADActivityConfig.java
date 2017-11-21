@@ -2,6 +2,7 @@ package org.davidliebman.android.distro;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -20,13 +21,16 @@ import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class ADActivityConfig extends AppCompatActivity
         implements AdapterView.OnItemSelectedListener{
 
     View debian_layout;
     View ubuntu_layout;
+    View fedora_layout;
 
     String string_arch_deb;
     String string_base_url_deb;
@@ -43,6 +47,10 @@ public class ADActivityConfig extends AppCompatActivity
     String string_proposed_ubu;
     String string_full_url;
 
+    String string_arch_fed;
+    String string_release_fed;
+
+
     String string_distro = "debian";
 
     boolean clear_db_on_exit = false;
@@ -58,6 +66,12 @@ public class ADActivityConfig extends AppCompatActivity
     TextView text_view_url = null;
     Button button_readme = null;
 
+    ////// specific to fedora /////
+    ArrayList<String> listName = new ArrayList<>();
+    ArrayList<String> listBaseUrl = new ArrayList<>();
+    ArrayList<String> listMetalink = new ArrayList<>();
+    ///////////////////////////////
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,6 +80,7 @@ public class ADActivityConfig extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         //final RadioGroup radioGroup = (RadioGroup) findViewById(R.id.radio_distro);
+        makeListsFed();
 
         RadioButton radioButton = (RadioButton) findViewById(R.id.radio_deb);
         radioButton.setChecked(true);
@@ -74,8 +89,10 @@ public class ADActivityConfig extends AppCompatActivity
 
         debian_layout = findViewById(R.id.layout_debian);
         ubuntu_layout = findViewById(R.id.layout_ubuntu);
+        fedora_layout = findViewById(R.id.layout_fedora);
 
         ubuntu_layout.setVisibility(View.GONE);
+        fedora_layout.setVisibility(View.GONE);
 
         Spinner spinner1 = (Spinner) findViewById(R.id.spinner_base_url_deb);
         Spinner spinner2 = (Spinner) findViewById(R.id.spinner_arch_deb);
@@ -87,6 +104,11 @@ public class ADActivityConfig extends AppCompatActivity
         Spinner spinner7 = (Spinner) findViewById(R.id.spinner_release_ubu);
         Spinner spinner8 = (Spinner) findViewById(R.id.spinner_mcnf_ubu);
         Spinner spinner9 = (Spinner) findViewById(R.id.spinner_proposed_ubu);
+
+        Spinner spinner10 = (Spinner) findViewById(R.id.spinner_arch_fed);
+        Spinner spinner11 = (Spinner) findViewById(R.id.spinner_release_fed);
+        Spinner spinner12 = (Spinner) findViewById(R.id.spinner_base_url_fed);
+
 
         ArrayAdapter<CharSequence> adapter1 = ArrayAdapter.createFromResource(this,
                 R.array.spinner_base_url_deb, android.R.layout.simple_spinner_item);
@@ -160,6 +182,31 @@ public class ADActivityConfig extends AppCompatActivity
         spinner9.setAdapter(adapter9);
         spinner9.setOnItemSelectedListener( this );
 
+        ArrayAdapter<CharSequence> adapter10 = ArrayAdapter.createFromResource(this,
+                R.array.spinner_arch_fed, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter10.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner10.setAdapter(adapter10);
+        spinner10.setOnItemSelectedListener( this );
+
+        ArrayAdapter<CharSequence> adapter11 = ArrayAdapter.createFromResource(this,
+                R.array.spinner_release_fed, android.R.layout.simple_spinner_item);
+        // Specify the layout to use when the list of choices appears
+        adapter11.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner11.setAdapter(adapter11);
+        spinner11.setOnItemSelectedListener( this );
+
+        ArrayAdapter<String> adapter12 = new ArrayAdapter<String>(this,
+                android.R.layout.simple_spinner_item, listName);
+        // Specify the layout to use when the list of choices appears
+        adapter12.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Apply the adapter to the spinner
+        spinner12.setAdapter(adapter12);
+        spinner12.setOnItemSelectedListener( this );
+
+
         text_custom_release = (EditText) findViewById(R.id.text_custom_release);
         text_custom_release.setVisibility(View.INVISIBLE);
 
@@ -217,6 +264,7 @@ public class ADActivityConfig extends AppCompatActivity
                 if (checked) {
                     debian_layout.setVisibility(View.VISIBLE);
                     ubuntu_layout.setVisibility(View.GONE);
+                    fedora_layout.setVisibility(View.GONE);
                     string_distro = "debian";
 
                 }
@@ -225,7 +273,17 @@ public class ADActivityConfig extends AppCompatActivity
                 if (checked) {
                     debian_layout.setVisibility(View.GONE);
                     ubuntu_layout.setVisibility(View.VISIBLE);
+                    fedora_layout.setVisibility(View.GONE);
                     string_distro = "ubuntu";
+
+                }
+                break;
+            case R.id.radio_fed:
+                if (checked) {
+                    debian_layout.setVisibility(View.GONE);
+                    ubuntu_layout.setVisibility(View.GONE);
+                    fedora_layout.setVisibility(View.VISIBLE);
+                    string_distro = "fedora";
 
                 }
                 break;
@@ -309,6 +367,12 @@ public class ADActivityConfig extends AppCompatActivity
             case R.id.spinner_proposed_ubu:
                 string_proposed_ubu = (String) parent.getItemAtPosition(position);
                 break;
+            case R.id.spinner_arch_fed:
+                string_arch_fed = (String) parent.getItemAtPosition(position);
+                break;
+            case R.id.spinner_release_fed:
+                string_release_fed = (String) parent.getItemAtPosition(position);
+                break;
         }
         buildUrl();
     }
@@ -364,5 +428,70 @@ public class ADActivityConfig extends AppCompatActivity
         text_view_url.setText(string_full_url);
 
 
+    }
+
+    //////// fedora specific methods ///////////
+    public void makeListsFed() {
+        ArrayList<Integer> docs = new ArrayList<>();
+
+        docs.add(R.raw.fedora_repo);
+        docs.add(R.raw.fedora_updates_repo);
+        docs.add(R.raw.fedora_updates_testing_repo);
+
+        listName.clear();
+        listBaseUrl.clear();
+        listMetalink.clear();
+
+        for (int i = 0; i < docs.size(); i ++) {
+            String result;
+            try {
+                Resources res = getResources();
+                InputStream is = res.openRawResource(docs.get(i));
+
+                byte[] b = new byte[is.available()];
+                is.read(b);
+                result = new String(b);
+            } catch (Exception e) {
+                // e.printStackTrace();
+                result = "Error: can't show file.";
+            }
+
+            String base = new String();
+            String meta = new String();
+            String name = new String();
+
+            String line[] = result.split("\\r?\\n");
+            for (int j = 0; j < line.length; j ++) {
+                String fed = line[j];
+
+                System.out.println(fed);
+
+                if(fed.startsWith("baseurl=")) {
+                    base = fed.substring(("baseurl=").length());
+                    meta = "";
+                }
+                else if (fed.startsWith("metalink=")) {
+                    meta = fed.substring(("metalink=").length());
+                    base = "";
+                }
+                else if (fed.startsWith("name=")) {
+                    name = fed.substring(("name=").length());
+                    System.out.println(name + "here");
+                    System.out.println(fed + "here too");
+                }
+                if ((fed.trim().contentEquals("") || fed.startsWith("[")) && !name.isEmpty()) {
+                    listName.add(name);
+                    listBaseUrl.add(base);
+                    listMetalink.add(meta);
+                    name = "";
+                    base = "";
+                    meta = "";
+                }
+            }
+        }
+    }
+
+    public String makeUrlFed(int position) {
+        return "";
     }
 }

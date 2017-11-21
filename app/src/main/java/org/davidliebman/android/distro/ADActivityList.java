@@ -111,6 +111,19 @@ public class ADActivityList extends ListActivity
             }
         });
 
+        Button urlButton = (Button) findViewById(R.id.check_button);
+        urlButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (down == null || down.getStatus() == AsyncTask.Status.FINISHED) {
+                    mListType = ADDownload.ACTION_LIST_UPDATE_SECTION_DEB;
+                    down = new DownloadFilesTask();
+                    down.execute(getDistroURL());
+                }
+
+            }
+        });
+
     }
 
     @Override
