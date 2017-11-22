@@ -45,13 +45,18 @@ public class ADDownloadXml {
 
     private XmlPullParser mXpp;
     public String url = "";
+    private String baseUrl = "";
     public ArrayList<ADPackageInfo> list = new ArrayList<>();
 
     private static final String ns = null;
     boolean mDebug = true;
     int mCount = 0;
 
-    public void parseFindUrl(InputStream in) throws XmlPullParserException, IOException {
+    public ADDownloadXml (String baseUrl) {
+        this.baseUrl = baseUrl;// getFedUrl(baseUrl);
+    }
+
+    public String  parseFindUrl(InputStream in) throws XmlPullParserException, IOException {
         try {
             mXpp = Xml.newPullParser();
             mXpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
@@ -63,9 +68,10 @@ public class ADDownloadXml {
         } finally {
             if (in != null) in.close();
         }
+        return url;
     }
 
-    public void parseFindPackagelist( InputStream in) throws XmlPullParserException, IOException {
+    public String  parseFindPackagelist( InputStream in) throws XmlPullParserException, IOException {
         //List entries = new ArrayList();
 
         try {
@@ -79,9 +85,10 @@ public class ADDownloadXml {
         } finally {
             if (in != null) in.close();
         }
+        return url;
     }
 
-    public void parseFindAllPackages( InputStream in) throws XmlPullParserException, IOException {
+    public String  parseFindAllPackages( InputStream in) throws XmlPullParserException, IOException {
         //List entries = new ArrayList();
 
         try {
@@ -95,6 +102,7 @@ public class ADDownloadXml {
         } finally {
             if (in != null) in.close();
         }
+        return url;
     }
 
     private void skip() throws XmlPullParserException, IOException {
@@ -239,7 +247,27 @@ public class ADDownloadXml {
     }
 
     //////////////// tag consuming methods end /////////////////////////////
+    public String  getFedUrl(String url) {
+        try {
 
+            String METALINK = "metalink=";
+            String BASEURL = "baseurl=";
+
+            if(url.trim().startsWith(BASEURL)) {
+                url = url.trim().substring(BASEURL.length())
+                        + "repodata/repomd.xml";
+                return url;
+            }
+            if(url.trim().startsWith(METALINK)) url = url.trim().substring(METALINK.length());
+
+            System.out.println(url + " debug");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return url;
+    }
+    ////////////////////////////////////////////////////////////////////////
     /* metalink file */
 
     private void metalink() throws XmlPullParserException, IOException{
@@ -300,8 +328,8 @@ public class ADDownloadXml {
         String newUrl = this.getText();
         if ((protocol.contentEquals(VAL_HTTP) || protocol.contentEquals(VAL_HTTPS)) &&
                 (type.contentEquals(VAL_HTTPS) || type.contentEquals(VAL_HTTP)) &&
-                url.contentEquals("")) {
-            url = newUrl.trim();
+                (url.contentEquals("") || true)) {
+            url = getFedUrl( newUrl.trim());
         }
         System.out.println(url+ " new url ");
         this.consumeEndTag(TAG_URL);
@@ -339,17 +367,25 @@ public class ADDownloadXml {
     }
 
     private void data() {
-        this.advanceToTag(TAG_DATA);
-        String mDataType = mXpp.getAttributeValue(null,ATTR_TYPE);
-        //this.consumeStartTag(TAG_DATA);
-        System.out.println(mDataType + " -- " + mXpp.getName());
-        if (mDataType.contentEquals(VAL_PRIMARY)) {
-            //this.consumeStartTag(TAG_DATA);
-            this.advanceToTag(TAG_LOCATION);
-            location();
-        }
+        try {
+            this.advanceToTag(TAG_DATA);
+            String mDataType = mXpp.getAttributeValue(null, ATTR_TYPE);
 
-        this.consumeEndTag(TAG_DATA);
+            System.out.println(mDataType + " -- " + mXpp.getName());
+            //this.consumeStartTag(TAG_DATA);
+
+
+            if (mDataType.contentEquals(VAL_PRIMARY)) {
+                //this.consumeStartTag(TAG_DATA);
+                this.advanceToTag(TAG_LOCATION);
+                //mXpp.next();
+                System.out.println("content equals " + VAL_PRIMARY);
+                location();
+            }
+
+            this.consumeEndTag(TAG_DATA);
+        }
+        catch (Exception e) {e.printStackTrace();}
     }
 
     private void location() {
@@ -357,9 +393,10 @@ public class ADDownloadXml {
         String mLocation = mXpp.getAttributeValue(null,ATTR_HREF);
         System.out.println(mLocation);
 
-        String mNewUrl = url.substring(0, url.length() - URL_PART_ENDING.length()) + mLocation;
-
+        String mBase = baseUrl;
+        String mNewUrl = mBase.substring(0, mBase.length() - URL_PART_ENDING.length()) + mLocation;
         url = mNewUrl;
+        //if (url.contentEquals("")) url = mNewUrl;
         System.out.println(url + " package url");
 
         this.consumeEndTag(TAG_LOCATION);
@@ -399,10 +436,17 @@ public class ADDownloadXml {
         this.consumeStartTag(TAG_PACKAGE);
         mCount ++;
         try {
-            while (mXpp.getName() != null || (mXpp.getEventType() != XmlPullParser.END_TAG &&
-                    !mXpp.getName().equalsIgnoreCase(TAG_PACKAGE))) {
-                if (mXpp.getName().equalsIgnoreCase(TAG_NAME)) {
+            System.out.println(mCount + " <--" );
+            while ( mXpp.getEventType() != XmlPullParser.END_TAG &&
+                    (mXpp.getName() != null && !mXpp.getName().equalsIgnoreCase(TAG_PACKAGE))) {
+                ///////////////////////////////
+                if (mXpp.getName() == null) {
+                    mXpp.next();
+                }
+
+                else if (mXpp.getName().equalsIgnoreCase(TAG_NAME)) {
                     package_name();
+                    System.out.println("package_name");
                 }
                 else if (mXpp.getName().equalsIgnoreCase(TAG_ARCH)) {
                     package_arch();
@@ -418,7 +462,9 @@ public class ADDownloadXml {
                 }
             }
         }
-        catch (Exception e){e.printStackTrace();}
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
 
         this.consumeEndTag(TAG_PACKAGE);

@@ -28,6 +28,7 @@ import java.util.zip.GZIPInputStream;
 public class ADDownload {
 
     private String mUrl = "";
+    private String mUrlFedBase = "";
     private String mSearchString = "";
     private String mToastMessage = "";
     private long mDateDownload = 0;
@@ -79,7 +80,8 @@ public class ADDownload {
         mDateOld = old;
         mListType = action;
         //mList = downloadFile(mUrl);
-        mFedXml = new ADDownloadXml();
+        mFedXml = new ADDownloadXml("");
+        mUrlFedBase = url;
         String mFedUrl = "";
 
         String mDateUrl = mUrl;
@@ -145,13 +147,22 @@ public class ADDownload {
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
                 try {
-                    mFedXml = new ADDownloadXml();
+                    //mFedXml = new ADDownloadXml();
                     mFedUrl = getFedUrl();
-                    mFedXml = new ADDownloadXml();
-                    mFedXml.parseFindPackagelist(inputStreamXmlFile(mFedUrl));
-                    mFedUrl = mFedXml.url;
-                    mFedXml = new ADDownloadXml();
-                    System.out.println(mFedUrl + " test url");
+                    mFedXml = new ADDownloadXml(mFedUrl);
+
+                    //mUrlFedBase = mFedXml.getFedUrl(mUrlFedBase);
+
+                    System.out.println(mFedUrl + " test url 1");
+
+                    mUrl = mFedXml.parseFindPackagelist(inputStreamXmlFile(mFedUrl));
+
+                    mUrlFedBase = mFedUrl;
+                    mFedUrl = mUrl;
+
+                    System.out.println(mFedUrl + " calling fn");
+                    mFedXml = new ADDownloadXml(mUrlFedBase); // base
+                    System.out.println(mFedUrl + " test url 2");
                     mFedXml.parseFindAllPackages(inputStreamGzipFile(mFedUrl));
                     //System.out.println(mFedXml.url);
                 }
@@ -185,9 +196,11 @@ public class ADDownload {
             }
             if(mUrl.trim().startsWith(METALINK)) mUrl = mUrl.trim().substring(METALINK.length());
 
-            mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
+            mUrl = mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
 
-            System.out.println(mFedXml.url + " debug");
+            System.out.println(mUrl + " -- url");
+            System.out.println(mFedXml.url + " --debug");
+            return mFedXml.url;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -296,6 +309,7 @@ public class ADDownload {
 
         } catch (MalformedURLException me) {
             System.out.println("MalformedURLException: " + me);
+            me.printStackTrace();
         } catch (IOException ioe) {
             System.out.println("IOException: " + ioe);
         }
@@ -340,6 +354,7 @@ public class ADDownload {
 
         } catch (MalformedURLException me) {
             System.out.println("MalformedURLException: " + me);
+            me.printStackTrace();
         } catch (IOException ioe) {
             System.out.println("IOException: " + ioe);
         }
@@ -364,6 +379,7 @@ public class ADDownload {
 
         } catch (MalformedURLException me) {
             System.out.println("MalformedURLException: " + me);
+            me.printStackTrace();
         } catch (IOException ioe) {
             System.out.println("IOException: " + ioe);
         }
