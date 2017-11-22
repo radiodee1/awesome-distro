@@ -145,9 +145,15 @@ public class ADDownload {
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
                 try {
+                    mFedXml = new ADDownloadXml();
                     mFedUrl = getFedUrl();
+                    mFedXml = new ADDownloadXml();
                     mFedXml.parseFindPackagelist(inputStreamXmlFile(mFedUrl));
-                    System.out.println(mFedXml.url);
+                    mFedUrl = mFedXml.url;
+                    mFedXml = new ADDownloadXml();
+                    System.out.println(mFedUrl + " test url");
+                    mFedXml.parseFindAllPackages(inputStreamGzipFile(mFedUrl));
+                    //System.out.println(mFedXml.url);
                 }
                 catch (Exception e) {e.printStackTrace();}
 
@@ -343,6 +349,9 @@ public class ADDownload {
     public InputStream inputStreamGzipFile(String url) {
         GZIPInputStream gzis = null;
         try {
+
+
+
             URL distro = new URL(url);
             URLConnection con = distro.openConnection();
 
