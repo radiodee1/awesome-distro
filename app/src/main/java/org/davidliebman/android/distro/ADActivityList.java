@@ -89,22 +89,26 @@ public class ADActivityList extends ListActivity
             public void onClick(View v) {
                 if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB && download == null) {
                     mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+                    checkUrlForFed();
                     down = new DownloadFilesTask();
                     down.execute(getDistroURL());
                 }
                 else if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB) {
                     mListType = ADDownload.ACTION_LIST_SHOW_SECTION_DEB;
+                    checkUrlForFed();
                     down = new DownloadFilesTask();
                     down.execute(getDistroURL());
                 }
 
                 else if (mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB) {
                     mListType = ADDownload.ACTION_LIST_SHOW_SECTION_DEB;
+                    checkUrlForFed();
                     down = new DownloadFilesTask();
                     down.execute(getDistroURL());
                 }
                 else {
                     mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+                    checkUrlForFed();
                     down = new DownloadFilesTask();
                     down.execute(getDistroURL());
                 }
@@ -117,6 +121,7 @@ public class ADActivityList extends ListActivity
             public void onClick(View v) {
                 if (down == null || down.getStatus() == AsyncTask.Status.FINISHED) {
                     mListType = ADDownload.ACTION_LIST_UPDATE_SECTION_DEB;
+                    checkUrlForFed();
                     down = new DownloadFilesTask();
                     down.execute(getDistroURL());
                 }
@@ -125,6 +130,15 @@ public class ADActivityList extends ListActivity
         });
 
     }
+
+    public void checkUrlForFed() {
+        String BASEURL = "baseurl=";
+        String METALINK = "metalink=";
+        if (string_url.startsWith(BASEURL) || string_url.startsWith(METALINK)) {
+            mListType = ADDownload.ACTION_GZIP_FILE_GET_URL_FED;
+        }
+    }
+
 
     @Override
     protected void onResume() {
@@ -281,6 +295,7 @@ public class ADActivityList extends ListActivity
         // check distro
         if (down == null || down.getStatus() == AsyncTask.Status.FINISHED) {
             mListType = ADDownload.ACTION_LIST_UPDATE_SECTION_DEB;
+            checkUrlForFed();
             down = new DownloadFilesTask();
             down.execute(getDistroURL());
         }
@@ -331,7 +346,8 @@ public class ADActivityList extends ListActivity
         public DownloadFilesTask() {
             if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB ||
                     mListType == ADDownload.ACTION_LIST_UPDATE_PACKAGE_DEB ||
-                    mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_DEB) {
+                    mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_DEB ||
+                    mListType == ADDownload.ACTION_GZIP_FILE_GET_URL_FED) {
                 progressBar.setMessage("Please wait");
                 progressBar.show();
                 progressBar.setIndeterminate(true);
@@ -349,7 +365,7 @@ public class ADActivityList extends ListActivity
             if (params[0].endsWith(".gz")) {
                 //mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
             }
-            else {
+            else if (mListType != ADDownload.ACTION_GZIP_FILE_GET_URL_FED){
                 mListType = ADDownload.ACTION_TEXT_FILE_SHOW_ALL;
             }
             //download = new ADDownload(params[0], new Date(), mListType);
@@ -421,6 +437,9 @@ public class ADActivityList extends ListActivity
                 case ADDownload.ACTION_CLEAR_DB:
                     if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
                     download.deleteDB(ADActivityList.this);
+                    break;
+                case ADDownload.ACTION_GZIP_FILE_GET_URL_FED:
+                    if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
                     break;
             }
 

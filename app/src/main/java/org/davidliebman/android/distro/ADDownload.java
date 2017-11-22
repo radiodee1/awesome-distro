@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -37,6 +38,7 @@ public class ADDownload {
     private int mListType = 0;
     private PackageDbHelper mDbHelper;
     private boolean mTestingDisable = true;
+    private ADDownloadXml mFedXml;
 
     public static final int ACTION_GZIP_FILE_SHOW_ALL = 1;
     public static final int ACTION_TEXT_FILE_SHOW_ALL = 2;
@@ -51,6 +53,10 @@ public class ADDownload {
     public static final int ACTION_ADD_PACKAGE = 11;
     public static final int ACTION_REMOVE_PACKAGE = 12;
     public static final int ACTION_CLEAR_DB = 13;
+    public static final int ACTION_GZIP_FILE_SHOW_PACKAGE_FED = 14;
+    public static final int ACTION_GZIP_FILE_SHOW_SECTION_FED = 15;
+    public static final int ACTION_GZIP_FILE_GET_URL_FED = 16;
+
 
     public static final String STRING_PACKAGE = "Package: ";
     public static final String STRING_VERSION = "Version: ";
@@ -73,8 +79,19 @@ public class ADDownload {
         mDateOld = old;
         mListType = action;
         //mList = downloadFile(mUrl);
+        mFedXml = new ADDownloadXml();
 
-        downloadDate(mUrl);
+        String mDateUrl = mUrl;
+        if(mUrl.trim().startsWith("baseurl=")) {
+            mDateUrl = mUrl.trim().substring("baseurl=".length()) + "repodata/repomd.xml";
+        }
+        if(mUrl.trim().startsWith("metalink=")) {
+            mDateUrl = mUrl.trim().substring("metalink=".length());
+        }
+
+        if (true || mDateUrl.contentEquals(mUrl)) {
+            downloadDate(mDateUrl);
+        }
         System.out.println("date from download " + new Date(mDateDownload));
 
         switch (action) {
@@ -116,6 +133,28 @@ public class ADDownload {
                 mList = downloadGzipFile(mUrl);
 
                 fillPackageList();
+                break;
+            case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
+                break;
+            case ACTION_GZIP_FILE_SHOW_SECTION_FED:
+                break;
+            case ACTION_GZIP_FILE_GET_URL_FED:
+                try {
+
+                    String METALINK = "metalink=";
+                    String BASEURL = "baseurl=";
+
+                    if(mUrl.trim().startsWith(BASEURL)) mUrl = mUrl.trim().substring(BASEURL.length())
+                            + "repodata/repomd.xml";
+                    if(mUrl.trim().startsWith(METALINK)) mUrl = mUrl.trim().substring(METALINK.length());
+
+                    mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
+
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 break;
         }
 
@@ -262,6 +301,45 @@ public class ADDownload {
 
 
         return list;
+    }
+
+    public InputStream inputStreamXmlFile(String url) {
+        InputStream is = null;
+        try {
+            URL distro = new URL(url);
+            URLConnection con = distro.openConnection();
+
+            //GZIPInputStream
+            is = con.getInputStream();
+
+
+        } catch (MalformedURLException me) {
+            System.out.println("MalformedURLException: " + me);
+        } catch (IOException ioe) {
+            System.out.println("IOException: " + ioe);
+        }
+        return is;
+    }
+
+    public InputStream inputStreamGzipFile(String url) {
+        GZIPInputStream gzis = null;
+        try {
+            URL distro = new URL(url);
+            URLConnection con = distro.openConnection();
+
+            //GZIPInputStream
+            gzis = new GZIPInputStream(con.getInputStream());
+            //InputStreamReader reader = new InputStreamReader(gzis);
+            //BufferedReader in = new BufferedReader(reader);
+
+            //return gzis;
+
+        } catch (MalformedURLException me) {
+            System.out.println("MalformedURLException: " + me);
+        } catch (IOException ioe) {
+            System.out.println("IOException: " + ioe);
+        }
+        return gzis;
     }
 
     public void downloadDate(String url) {

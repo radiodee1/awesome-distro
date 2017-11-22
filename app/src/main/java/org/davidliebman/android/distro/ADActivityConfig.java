@@ -506,15 +506,13 @@ public class ADActivityConfig extends AppCompatActivity
 
     public String makeUrlFed(int position) {
         String out = listUrl.get(position);
-        String METALINK = "metalink=";
-        String BASEURL = "baseurl=";
         String RELEASEVER = "$releasever";
         String BASEARCH = "$basearch";
 
         out = out.replace(RELEASEVER, string_release_fed);
         out = out.replace(BASEARCH, string_arch_fed);
 
-        System.out.println(out + " here");
+        //System.out.println(out + " here");
         return out;
     }
 }
