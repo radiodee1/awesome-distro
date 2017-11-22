@@ -365,7 +365,9 @@ public class ADActivityList extends ListActivity
             if (params[0].endsWith(".gz")) {
                 //mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
             }
-            else if (mListType != ADDownload.ACTION_GZIP_FILE_GET_URL_FED){
+            else if (mListType != ADDownload.ACTION_GZIP_FILE_GET_URL_FED &&
+                    mListType != ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED &&
+                    mListType != ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED){
                 mListType = ADDownload.ACTION_TEXT_FILE_SHOW_ALL;
             }
             //download = new ADDownload(params[0], new Date(), mListType);

@@ -80,6 +80,7 @@ public class ADDownload {
         mListType = action;
         //mList = downloadFile(mUrl);
         mFedXml = new ADDownloadXml();
+        String mFedUrl = "";
 
         String mDateUrl = mUrl;
         if(mUrl.trim().startsWith("baseurl=")) {
@@ -135,25 +136,20 @@ public class ADDownload {
                 fillPackageList();
                 break;
             case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
+                mFedUrl = getFedUrl();
+
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
+                mFedUrl = getFedUrl();
+
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
                 try {
-
-                    String METALINK = "metalink=";
-                    String BASEURL = "baseurl=";
-
-                    if(mUrl.trim().startsWith(BASEURL)) mUrl = mUrl.trim().substring(BASEURL.length())
-                            + "repodata/repomd.xml";
-                    if(mUrl.trim().startsWith(METALINK)) mUrl = mUrl.trim().substring(METALINK.length());
-
-                    mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
-
+                    mFedUrl = getFedUrl();
+                    mFedXml.parseFindPackagelist(inputStreamXmlFile(mFedUrl));
+                    System.out.println(mFedXml.url);
                 }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
+                catch (Exception e) {e.printStackTrace();}
 
                 break;
         }
@@ -169,6 +165,29 @@ public class ADDownload {
     public long getDateDownload() {return mDateDownload;}
     public String getToastMessage() {return mToastMessage;}
     public void setToastMessage(String in) {mToastMessage = in;}
+
+    public String  getFedUrl() {
+        try {
+
+            String METALINK = "metalink=";
+            String BASEURL = "baseurl=";
+
+            if(mUrl.trim().startsWith(BASEURL)) {
+                mUrl = mUrl.trim().substring(BASEURL.length())
+                        + "repodata/repomd.xml";
+                return mUrl;
+            }
+            if(mUrl.trim().startsWith(METALINK)) mUrl = mUrl.trim().substring(METALINK.length());
+
+            mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
+
+            System.out.println(mFedXml.url + " debug");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return mFedXml.url;
+    }
 
     public ArrayList<ADPackageInfo> getList(int type) {
         ArrayList<ADPackageInfo> sublist = new ArrayList<>();

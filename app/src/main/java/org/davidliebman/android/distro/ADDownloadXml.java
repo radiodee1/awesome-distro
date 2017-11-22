@@ -23,11 +23,19 @@ public class ADDownloadXml {
     private static final String TAG_VERIFICATION = "verification";
     private static final String TAG_RESOURCES = "resources";
     private static final String TAG_URL = "url";
+    private static final String TAG_REPOMD = "repomd";
+    private static final String TAG_DATA = "data";
+    private static final String TAG_LOCATION = "location";
+
     private static final String ATTR_PROTOCOL = "protocol";
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_PREFERENCE = "preference";
+    private static final String ATTR_HREF = "href";
     private static final String VAL_HTTP = "http";
     private static final String VAL_HTTPS = "https";
+    private static final String VAL_PRIMARY = "primary";
+
+    private static final String URL_PART_ENDING = "repodata/repomd.xml";
 
     private XmlPullParser mXpp;
     public String url = "";
@@ -50,27 +58,19 @@ public class ADDownloadXml {
         }
     }
 
-    private void startRead( String startTag) throws XmlPullParserException, IOException {
+    public void parseFindPackagelist( InputStream in) throws XmlPullParserException, IOException {
         //List entries = new ArrayList();
 
-        //mXpp.require(XmlPullParser.START_TAG, ns, startTag);
-        while (mXpp.next() != XmlPullParser.END_TAG) {
-            if (mXpp.getEventType() != XmlPullParser.START_TAG) {
-                continue;
-            }
-            String name = mXpp.getName();
-            // Starts by looking for the entry tag
-            if (name.equals(TAG_METALINK)) {
-                // this is a metalink xml file //
-                metalink();
-            } else if (name.equals(TAG_METADATA)){
-                // this is a packagelist xml file //
-
-            }
-            else {
-                // we are not interested //
-                skip();
-            }
+        try {
+            mXpp = Xml.newPullParser();
+            mXpp.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            mXpp.setInput(in, null);
+            mXpp.nextTag();
+            //return
+            //startRead(TAG_METALINK);
+            repomd();
+        } finally {
+            in.close();
         }
     }
 
@@ -196,9 +196,11 @@ public class ADDownloadXml {
     public void advanceToTag(String in) {
         try {
             if (in != null) {
-                while (!mXpp.getName().equalsIgnoreCase(in)) {
+                boolean test = true;
+                while (test && !mXpp.getName().equalsIgnoreCase(in)) {
                     if (mDebug) System.out.println(mXpp.getPositionDescription());
                     mXpp.next();
+                    if (mXpp.getName() == null) test = false;
                 }
             }
             else {
@@ -280,6 +282,62 @@ public class ADDownloadXml {
         }
         System.out.println(url+ " new url ");
         this.consumeEndTag(TAG_URL);
+    }
+
+    /* repomd file */
+
+    private void repomd() {
+        this.consumeStartTag(TAG_REPOMD);
+        this.advanceToTag(TAG_DATA);
+
+        //data();
+        try {
+
+            /* technique for multiple identical tags */
+            this.advanceToTag(TAG_URL);
+            data();
+            //mXpp.next();
+            this.advanceToTag(TAG_URL);
+            while (mXpp.getEventType() == XmlPullParser.END_TAG &&
+                    mXpp.getName().equalsIgnoreCase(TAG_URL)) {
+
+                mXpp.next();
+                if (mXpp.getEventType() == XmlPullParser.START_TAG &&
+                        mXpp.getName().equalsIgnoreCase(TAG_URL)) {
+                    data();
+
+                }
+            }
+        }
+        catch (Exception e) {
+            System.out.println("exception url pos");
+        }
+        this.consumeEndTag(TAG_REPOMD);
+    }
+
+    private void data() {
+        this.consumeStartTag(TAG_DATA);
+        String mDataType = mXpp.getAttributeValue(null,ATTR_TYPE);
+
+        if (mDataType.contentEquals(VAL_PRIMARY)) {
+            this.advanceToTag(TAG_LOCATION);
+            location();
+        }
+
+        this.consumeEndTag(TAG_DATA);
+    }
+
+    private void location() {
+        this.consumeStartTag(TAG_LOCATION);
+        String mLocation = mXpp.getAttributeValue(null,ATTR_HREF);
+        System.out.println(mLocation);
+
+        String mNewUrl = url.substring(0, url.length() - URL_PART_ENDING.length()) + mLocation;
+
+        url = mNewUrl;
+        System.out.println(url + " package url");
+
+        this.consumeEndTag(TAG_LOCATION);
     }
 
     /* metadata package file */
