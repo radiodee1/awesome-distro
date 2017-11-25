@@ -47,6 +47,7 @@ public class ADDownloadXml {
     public String url = "";
     private String baseUrl = "";
     public ArrayList<ADPackageInfo> list = new ArrayList<>();
+    private ADPackageInfo package_info = null;
 
     private static final String ns = null;
     boolean mDebug = true;
@@ -445,6 +446,7 @@ public class ADDownloadXml {
     private void metadata_package() {
         this.consumeStartTag(TAG_PACKAGE);
         mCount ++;
+        package_info = new ADPackageInfo();
         try {
             System.out.println(mCount + " <--" );
             boolean loop = true;
@@ -492,7 +494,11 @@ public class ADDownloadXml {
             e.printStackTrace();
         }
 
-
+        if (!package_info.packageVersion.contentEquals("") &&
+                !package_info.packageName.contentEquals("") &&
+                !package_info.packageSection.contentEquals("")) {
+            list.add(package_info);
+        }
         this.consumeEndTag(TAG_PACKAGE);
     }
 
@@ -500,17 +506,20 @@ public class ADDownloadXml {
         this.consumeStartTag(TAG_NAME);
         String name = this.getText();
         System.out.println(mCount + " " + name);
+        package_info.packageName = name;
         this.consumeEndTag(TAG_NAME);
     }
     private void package_arch() {
         this.consumeStartTag(TAG_ARCH);
-
+        String arch = this.getText();
+        //
         this.consumeEndTag(TAG_ARCH);
 
     }
     private void package_version() {
         this.consumeStartTag(TAG_VERSION);
-
+        String version = this.getText();
+        package_info.packageVersion = version;
         this.consumeEndTag(TAG_VERSION);
 
     }
