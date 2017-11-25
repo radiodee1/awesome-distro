@@ -51,6 +51,7 @@ public class ADDownloadXml {
     private static final String ns = null;
     boolean mDebug = true;
     int mCount = 0;
+    boolean mFoundGzUrl = false;
 
     public ADDownloadXml (String baseUrl) {
         this.baseUrl = baseUrl;// getFedUrl(baseUrl);
@@ -268,7 +269,7 @@ public class ADDownloadXml {
         return url;
     }
     ////////////////////////////////////////////////////////////////////////
-    /* metalink file */
+    /* metalink file ----------------------------- */
 
     private void metalink() throws XmlPullParserException, IOException{
         //this.consumeStartTag(TAG_METALINK);
@@ -307,6 +308,7 @@ public class ADDownloadXml {
                     mXpp.getName().equalsIgnoreCase(TAG_URL)) {
 
                 mXpp.next();
+                this.advanceToTag(TAG_URL);
                 if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_URL)) {
                     url();
@@ -335,12 +337,13 @@ public class ADDownloadXml {
         this.consumeEndTag(TAG_URL);
     }
 
-    /* repomd file */
+    /* repomd file ------------------------------- */
 
     private void repomd() {
         this.consumeStartTag(TAG_REPOMD);
         this.advanceToTag(TAG_DATA);
 
+        mFoundGzUrl = false;
         //data();
         try {
 
@@ -353,12 +356,16 @@ public class ADDownloadXml {
                     mXpp.getName().equalsIgnoreCase(TAG_DATA)) {
 
                 mXpp.next();
+                this.advanceToTag(TAG_DATA);
                 if (mXpp.getEventType() == XmlPullParser.START_TAG &&
-                        mXpp.getName().equalsIgnoreCase(TAG_DATA)) {
+                        mXpp.getName().equalsIgnoreCase(TAG_DATA) && !mFoundGzUrl) {
                     data();
 
                 }
             }
+
+            System.out.println("new url " + url);
+
         }
         catch (Exception e) {
             System.out.println("exception url pos");
@@ -380,6 +387,7 @@ public class ADDownloadXml {
                 this.advanceToTag(TAG_LOCATION);
                 //mXpp.next();
                 System.out.println("content equals " + VAL_PRIMARY);
+                mFoundGzUrl = true;
                 location();
             }
 
@@ -402,7 +410,7 @@ public class ADDownloadXml {
         this.consumeEndTag(TAG_LOCATION);
     }
 
-    /* metadata package file */
+    /* metadata package file ----------------------------- */
 
     private void metadata() {
         this.consumeStartTag(TAG_METADATA);
@@ -419,6 +427,7 @@ public class ADDownloadXml {
                     mXpp.getName().equalsIgnoreCase(TAG_PACKAGE)) {
 
                 mXpp.next();
+                this.advanceToTag(TAG_PACKAGE);
                 if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_PACKAGE)) {
                     metadata_package();
@@ -427,7 +436,8 @@ public class ADDownloadXml {
             }
         }
         catch (Exception e) {
-            System.out.println("exception url pos");
+            System.out.println("exception ");
+            e.printStackTrace();
         }
         this.consumeEndTag(TAG_METADATA);
     }
@@ -437,29 +447,45 @@ public class ADDownloadXml {
         mCount ++;
         try {
             System.out.println(mCount + " <--" );
-            while ( mXpp.getEventType() != XmlPullParser.END_TAG &&
-                    (mXpp.getName() != null && !mXpp.getName().equalsIgnoreCase(TAG_PACKAGE))) {
-                ///////////////////////////////
-                if (mXpp.getName() == null) {
-                    mXpp.next();
-                }
+            boolean loop = true;
 
-                else if (mXpp.getName().equalsIgnoreCase(TAG_NAME)) {
+            while (loop ){
+                if (mXpp.getName() == null) {
+                    //mXpp.next();
+                }
+                else if (mXpp.getEventType() == XmlPullParser.END_TAG &&
+                     !mXpp.getName().equalsIgnoreCase(TAG_PACKAGE)) {
+                    loop = false;
+                    break;
+                }
+                else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
+                        mXpp.getName().equalsIgnoreCase(TAG_NAME)) {
                     package_name();
                     System.out.println("package_name");
                 }
-                else if (mXpp.getName().equalsIgnoreCase(TAG_ARCH)) {
+                else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
+                        mXpp.getName().equalsIgnoreCase(TAG_ARCH)) {
                     package_arch();
+                    //continue;
+                    System.out.println("package_arch");
                 }
-                else if (mXpp.getName().equalsIgnoreCase(TAG_VERSION)) {
+                else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
+                        mXpp.getName().equalsIgnoreCase(TAG_VERSION)) {
                     package_version();
+                    System.out.println("package_version");
+                    //continue;
                 }
-                else if (mXpp.getName().equalsIgnoreCase(TAG_FORMAT)) {
+                else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
+                        mXpp.getName().equalsIgnoreCase(TAG_FORMAT)) {
                     package_format();
+                    //continue;
+                    System.out.println("package_format");
                 }
                 else {
                     mXpp.next();
+                    continue;
                 }
+                mXpp.next();
             }
         }
         catch (Exception e){
