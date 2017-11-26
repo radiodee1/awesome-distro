@@ -135,9 +135,17 @@ public class ADActivityList extends ListActivity
         String BASEURL = "baseurl=";
         String METALINK = "metalink=";
         if (string_url.startsWith(BASEURL) || string_url.startsWith(METALINK)) {
-            mListType = ADDownload.ACTION_GZIP_FILE_GET_URL_FED;
+            if (mListType == ADDownload.ACTION_LIST_SHOW_SECTION_DEB) mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED;
+            if (mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB) mListType = ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED;
+            if (mListType == ADDownload.ACTION_LIST_UPDATE_PACKAGE_DEB) mListType = ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED;
+            if (mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_DEB) mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED;
+            if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB) mListType = ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED;
+            if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB) mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED;
+
+            //mListType = ADDownload.ACTION_GZIP_FILE_GET_URL_FED;
         }
     }
+
 
 
     @Override
@@ -228,10 +236,22 @@ public class ADActivityList extends ListActivity
     }
 
     public String getDistroURL() {
-        if (string_url != null && !string_url.isEmpty()) {
-            return string_url;
+        if (string_url == null || string_url.isEmpty()) {
+            return "http://http.us.debian.org/debian/dists/testing/main/binary-amd64/" +"Packages.gz"; //+ "Release";
+
         }
-        return "http://http.us.debian.org/debian/dists/testing/main/binary-amd64/" +"Packages.gz"; //+ "Release";
+        else return string_url;
+
+        /*
+        if (string_url.startsWith("metalink=")){
+            return string_url.substring("metalink=".length());
+        }
+        if (string_url.startsWith("baseurl=")) {
+            return string_url.substring("baseurl=".length());
+        }
+        */
+
+        //return "http://http.us.debian.org/debian/dists/testing/main/binary-amd64/" +"Packages.gz"; //+ "Release";
     }
 
     @Override
@@ -347,7 +367,9 @@ public class ADActivityList extends ListActivity
             if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB ||
                     mListType == ADDownload.ACTION_LIST_UPDATE_PACKAGE_DEB ||
                     mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_DEB ||
-                    mListType == ADDownload.ACTION_GZIP_FILE_GET_URL_FED) {
+                    mListType == ADDownload.ACTION_GZIP_FILE_GET_URL_FED ||
+                    mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED ||
+                    mListType == ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED) {
                 progressBar.setMessage("Please wait");
                 progressBar.show();
                 progressBar.setIndeterminate(true);
@@ -367,7 +389,8 @@ public class ADActivityList extends ListActivity
             }
             else if (mListType != ADDownload.ACTION_GZIP_FILE_GET_URL_FED &&
                     mListType != ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED &&
-                    mListType != ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED){
+                    mListType != ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED &&
+                    mListType != ADDownload.ACTION_GZIP_FILE_GET_URL_FED){
                 mListType = ADDownload.ACTION_TEXT_FILE_SHOW_ALL;
             }
             //download = new ADDownload(params[0], new Date(), mListType);
@@ -441,8 +464,21 @@ public class ADActivityList extends ListActivity
                     download.deleteDB(ADActivityList.this);
                     break;
                 case ADDownload.ACTION_GZIP_FILE_GET_URL_FED:
+                    System.out.println("url fed");
                     if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
-                    listValues = download.getList(mListType);
+                    listValues = download.getListFed();
+                    mDateDownload = download.getDateDownload();
+                    break;
+                case ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
+                    System.out.println("package fed");
+                    if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
+                    listValues = download.getListFed();
+                    mDateDownload = download.getDateDownload();
+                    break;
+                case ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED:
+                    System.out.println("section fed");
+                    if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
+                    listValues = download.getListFed();
                     mDateDownload = download.getDateDownload();
                     break;
             }

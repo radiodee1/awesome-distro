@@ -465,7 +465,7 @@ public class ADDownloadXml {
         mCount ++;
         package_info = new ADPackageInfo();
         try {
-            System.out.println(mCount + " <--" );
+            //System.out.println(mCount + " <--" );
             boolean loop = true;
 
             while (loop ){
@@ -480,25 +480,25 @@ public class ADDownloadXml {
                 else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_NAME)) {
                     package_name();
-                    System.out.println("package_name");
+                    //System.out.println("package_name");
                 }
                 else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_ARCH)) {
                     package_arch();
                     //continue;
-                    System.out.println("package_arch");
+                    //System.out.println("package_arch");
                 }
                 else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_VERSION)) {
                     package_version();
-                    System.out.println("package_version");
+                    //System.out.println("package_version");
                     //continue;
                 }
                 else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_FORMAT)) {
                     package_format();
                     //continue;
-                    System.out.println("package_format");
+                    //System.out.println("package_format");
                 }
                 else {
                     mXpp.next();
@@ -515,17 +515,21 @@ public class ADDownloadXml {
                 !package_info.packageName.contentEquals("") &&
                 !package_info.packageSection.contentEquals("")) || true) {
 
+            /*
             switch (mListType) {
                 case ADDownload.ACTION_GZIP_FILE_GET_URL_FED:
                     list.add(package_info);
 
                     break;
                 case ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED:
+                    list.add(package_info);
                     break;
                 case ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
+                    list.add(package_info);
                     break;
             }
-            //list.add(package_info);
+            */
+            list.add(package_info);
         }
         this.consumeEndTag(TAG_PACKAGE);
     }
@@ -533,7 +537,7 @@ public class ADDownloadXml {
     private void package_name() {
         this.consumeStartTag(TAG_NAME);
         String name = this.getText();
-        System.out.println(mCount + " " + name);
+        //System.out.println(mCount + " " + name);
         package_info.packageName = name;
         this.consumeEndTag(TAG_NAME);
     }
@@ -553,7 +557,7 @@ public class ADDownloadXml {
         //String version = this.getText();
         this.advanceToTag(TAG_VERSION);
         package_info.packageVersion = version + "-" + release + "." + latestArch;
-        System.out.println(package_info.packageVersion);
+        //System.out.println(package_info.packageVersion);
         this.consumeEndTag(TAG_VERSION);
 
     }
@@ -562,13 +566,13 @@ public class ADDownloadXml {
 
         //this.advanceToTag(TAG_RPMGROUP);
         format_group();
-        System.out.println("group "+ mCount);
+        //System.out.println("group "+ mCount);
         this.consumeEndTag(TAG_FORMAT);
     }
     private void format_group() {
         this.consumeStartTag(TAG_RPMGROUP);
         String section = this.getText();
-        System.out.println(section + " section");
+        //System.out.println(section + " section");
         package_info.packageSection = section;
         this.consumeEndTag(TAG_RPMGROUP);
     }

@@ -141,20 +141,21 @@ public class ADDownload {
             case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
                 //mFedUrl = getFedUrl();
                 mPackageList = getFedList();
-                //fillPackageListFed();
+                fillPackageListFed();
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
                 //mFedUrl = getFedUrl();
-                mListFed = getFedList();
+                mPackageList = getFedList();
                 fillPackageListFed();
+                System.out.println("after fillPackage");
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
-                try {
+                //try {
                     //mFedXml = new ADDownloadXml();
-                    mListFed = getFedList();
-                    //fillPackageListFed();
-                }
-                catch (Exception e) {e.printStackTrace();}
+                mPackageList = getFedList();
+                fillPackageListFed();
+                //}
+                //catch (Exception e) {e.printStackTrace();}
 
                 break;
         }
@@ -163,6 +164,7 @@ public class ADDownload {
 
     //public void setUrl(String url) {mUrl = url;}
     //public String getUrl() {return mUrl;}
+    public ArrayList<ADPackageInfo> getListFed() {return mPackageList;}
     public void setDateOld(long date) {mDateOld = date;}
     //public Date getDateOld() {return  mDateOld;}
     //public ArrayList<ADPackageInfo> getList() {return mList;}
@@ -218,6 +220,7 @@ public class ADDownload {
         return mFedXml.getList();
     }
 
+    ///////// CALLED BY LIST ACTIVITY ////////////////
     public ArrayList<ADPackageInfo> getList(int type) {
         ArrayList<ADPackageInfo> sublist = new ArrayList<>();
 
@@ -278,7 +281,7 @@ public class ADDownload {
                     }
                 }
                 break;
-
+            //////////////////////move this!! ///////////////////////////
             case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
                 for (int i = 0; i < mPackageList.size(); i ++ ) {
                     if (mPackageList.get(i).packageSection.trim().endsWith(mSearchString.trim())) {
@@ -304,7 +307,7 @@ public class ADDownload {
                         }
                     }
                 }
-                fillPackageListFed();
+                //fillPackageListFed();
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
                 for (int i = 0; i < mPackageList.size(); i ++ ) {
@@ -477,12 +480,49 @@ public class ADDownload {
 
     private void fillPackageListFed() {
         ADPackageInfo packageInfo = new ADPackageInfo();
-        mPackageList = new ArrayList<>();
-        for (int i = 0; i < mListFed.size(); i ++ ) {
-            if(mListFed.get(i).packageSection.trim().contentEquals(mSearchString)) {
-                mPackageList.add(mListFed.get(i));
-            }
+        ArrayList<ADPackageInfo> mPackageListOut = new ArrayList<>();
+
+        switch (mListType) {
+            case ACTION_GZIP_FILE_GET_URL_FED:
+
+                for (int i = 0; i < mPackageList.size(); i ++ ) {
+                    if(true || mPackageList.get(i).packageSection.trim().contentEquals(mSearchString)) {
+                        mPackageListOut.add(mPackageList.get(i));
+                    }
+                }
+                break;
+            case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
+                for (int i = 0; i < mPackageList.size(); i ++ ) {
+                    if (mPackageList.get(i).packageSection.trim().endsWith(mSearchString.trim())) {
+                        //ADPackageInfo info = new ADPackageInfo();
+
+                        mPackageListOut.add(mPackageList.get(i));
+                        //System.out.println(mSearchString);
+
+                    }
+                }
+                break;
+            case ACTION_GZIP_FILE_SHOW_SECTION_FED:
+                ArrayList<String> repeats_here = new ArrayList<>();
+
+                for (int i = 0; i < mPackageList.size() ; i ++) {
+                    if (true ) {
+                        String mSection = mPackageList.get(i).packageSection;
+                        if (!repeats_here.contains(mSection.trim())) {
+                            ADPackageInfo info = new ADPackageInfo();
+                            info.packageName = mSection;
+                            repeats_here.add(mSection.trim());
+                            mPackageListOut.add(info);
+                        }
+                    }
+                }
+                //fillPackageListFed();
+                break;
         }
+
+        System.out.println("length " + mPackageListOut.size());
+
+        mPackageList = mPackageListOut;
     }
 
     public void onDestroy() {
