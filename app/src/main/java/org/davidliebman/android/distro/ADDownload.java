@@ -58,7 +58,8 @@ public class ADDownload {
     public static final int ACTION_GZIP_FILE_SHOW_PACKAGE_FED = 14;
     public static final int ACTION_GZIP_FILE_SHOW_SECTION_FED = 15;
     public static final int ACTION_GZIP_FILE_GET_URL_FED = 16;
-
+    public static final int ACTION_LIST_SHOW_PACKAGE_FED = 17;
+    public static final int ACTION_LIST_SHOW_SECTION_FED = 18;
 
     public static final String STRING_PACKAGE = "Package: ";
     public static final String STRING_VERSION = "Version: ";
@@ -75,6 +76,14 @@ public class ADDownload {
         //public static final String COLUMN_NAME_ID = "id";
     }
 
+    /*
+    public ADDownload(String url, long old, int action, String search, ArrayList<ADPackageInfo> l) {
+        this(url,old,action);
+
+        mSearchString = search;
+        mListFed = l;
+    }
+    */
 
     public ADDownload(String url, long old, int action) {
         mUrl = url;
@@ -139,32 +148,41 @@ public class ADDownload {
                 fillPackageList();
                 break;
             case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
-                //mFedUrl = getFedUrl();
-                mPackageList = getFedList();
-                fillPackageListFed();
+            case ACTION_LIST_SHOW_PACKAGE_FED:
+            case ACTION_LIST_SHOW_SECTION_FED:
+                //mPackageList = mListFed;
+                //mPackageList = getFedList();
+                //fillPackageListFed();
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
                 //mFedUrl = getFedUrl();
                 mPackageList = getFedList();
+                mListFed = mPackageList;
+
                 fillPackageListFed();
                 System.out.println("after fillPackage");
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
-                //try {
-                    //mFedXml = new ADDownloadXml();
+
                 mPackageList = getFedList();
                 fillPackageListFed();
-                //}
-                //catch (Exception e) {e.printStackTrace();}
 
                 break;
         }
 
     }
 
+
     //public void setUrl(String url) {mUrl = url;}
     //public String getUrl() {return mUrl;}
-    public ArrayList<ADPackageInfo> getListFed() {return mPackageList;}
+    public void setListType(int l) {mListType = l;}
+    public ArrayList<ADPackageInfo> getListUnsorted() {return mListFed;}
+    public ArrayList<ADPackageInfo> getListFed() {
+        if (mListType == ACTION_GZIP_FILE_SHOW_PACKAGE_FED) {
+            mPackageList = this.getFedList();
+        }
+        return mPackageList;
+    }
     public void setDateOld(long date) {mDateOld = date;}
     //public Date getDateOld() {return  mDateOld;}
     //public ArrayList<ADPackageInfo> getList() {return mList;}
@@ -175,62 +193,65 @@ public class ADDownload {
 
     public ArrayList<ADPackageInfo>  getFedList() {
         try {
+            if (mListType == ACTION_GZIP_FILE_SHOW_SECTION_FED) {
+                String METALINK = "metalink=";
+                String BASEURL = "baseurl=";
 
-            String METALINK = "metalink=";
-            String BASEURL = "baseurl=";
+                if (mUrl.trim().startsWith(BASEURL)) {
+                    mUrl = mUrl.trim().substring(BASEURL.length())
+                            + "repodata/repomd.xml";
+                    //return mUrl;
+                } else if (mUrl.trim().startsWith(METALINK))
+                    mUrl = mUrl.trim().substring(METALINK.length());
 
-            if(mUrl.trim().startsWith(BASEURL)) {
-                mUrl = mUrl.trim().substring(BASEURL.length())
-                        + "repodata/repomd.xml";
-                //return mUrl;
+                mUrl = mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
+
+                //System.out.println(mUrl + " -- url");
+                //System.out.println(mFedXml.url + " --debug");
+                String mFedUrl = mFedXml.url;
+
+                ////////////////////////////////////////////
+                mFedXml = new ADDownloadXml(mFedUrl);
+
+                //System.out.println(mFedUrl + " test url 1");
+
+                mUrl = mFedXml.parseFindPackagelist(inputStreamXmlFile(mFedUrl));
+
+                mUrlFedBase = mFedUrl;
+                mFedUrl = mUrl;
+
+                System.out.println(mFedUrl + " calling fn");
+                mFedXml = new ADDownloadXml(mUrlFedBase); // base
+                System.out.println(mFedUrl + " test url 2");
+
+                mFedXml.setSearchString(mSearchString);
+                mFedXml.setListType(mListType);
+
+                mFedXml.parseFindAllPackages(inputStreamGzipFile(mFedUrl));
+                return mFedXml.getList();
             }
-            else if(mUrl.trim().startsWith(METALINK)) mUrl = mUrl.trim().substring(METALINK.length());
+            else if(mListType == ACTION_GZIP_FILE_SHOW_PACKAGE_FED ||
+                    mListType == ACTION_LIST_SHOW_PACKAGE_FED ||
+                    mListType == ACTION_LIST_SHOW_SECTION_FED) {
 
-            mUrl = mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
+                mPackageList = mListFed;
+                fillPackageListFed();
+                System.out.println("getFedList()");
+                return mPackageList;
 
-            System.out.println(mUrl + " -- url");
-            System.out.println(mFedXml.url + " --debug");
-            String mFedUrl = mFedXml.url;
-
-            ////////////////////////////////////////////
-            mFedXml = new ADDownloadXml(mFedUrl);
-
-            //mUrlFedBase = mFedXml.getFedUrl(mUrlFedBase);
-
-            System.out.println(mFedUrl + " test url 1");
-
-            mUrl = mFedXml.parseFindPackagelist(inputStreamXmlFile(mFedUrl));
-
-            mUrlFedBase = mFedUrl;
-            mFedUrl = mUrl;
-
-            System.out.println(mFedUrl + " calling fn");
-            mFedXml = new ADDownloadXml(mUrlFedBase); // base
-            System.out.println(mFedUrl + " test url 2");
-
-            mFedXml.setSearchString(mSearchString);
-            mFedXml.setListType(mListType);
-
-            mFedXml.parseFindAllPackages(inputStreamGzipFile(mFedUrl));
-            return mFedXml.getList();
+            }
         }
         catch (Exception e) {
             e.printStackTrace();
         }
-        return mFedXml.getList();
+        return mPackageList; // mFedXml.getList();
     }
 
     ///////// CALLED BY LIST ACTIVITY ////////////////
     public ArrayList<ADPackageInfo> getList(int type) {
         ArrayList<ADPackageInfo> sublist = new ArrayList<>();
 
-        if (mListType == ACTION_FILE_NO_DOWNLOAD) {
-            //sublist = mList;
-            //return sublist;
-        }
-
         mListType = type;
-
 
         switch (mListType) {
             case ACTION_GZIP_FILE_SHOW_PACKAGE_DEB:
@@ -281,7 +302,7 @@ public class ADDownload {
                     }
                 }
                 break;
-            
+
 
         }
 
@@ -455,12 +476,13 @@ public class ADDownload {
                 }
                 break;
             case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
+                System.out.println("seaarch " + mSearchString);
                 for (int i = 0; i < mPackageList.size(); i ++ ) {
-                    if (mPackageList.get(i).packageSection.trim().endsWith(mSearchString.trim())) {
+                    if (mPackageList.get(i).packageSection.trim().contentEquals(mSearchString.trim())) {
                         //ADPackageInfo info = new ADPackageInfo();
 
                         mPackageListOut.add(mPackageList.get(i));
-                        //System.out.println(mSearchString);
+                        System.out.println(mSearchString);
 
                     }
                 }
