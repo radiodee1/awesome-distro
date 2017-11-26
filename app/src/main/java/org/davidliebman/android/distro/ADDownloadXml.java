@@ -37,6 +37,8 @@ public class ADDownloadXml {
     private static final String ATTR_TYPE = "type";
     private static final String ATTR_PREFERENCE = "preference";
     private static final String ATTR_HREF = "href";
+    private static final String ATTR_PACKAGES = "packages";
+
     private static final String VAL_HTTP = "http";
     private static final String VAL_HTTPS = "https";
     private static final String VAL_PRIMARY = "primary";
@@ -48,6 +50,9 @@ public class ADDownloadXml {
     private String baseUrl = "";
     public ArrayList<ADPackageInfo> list = new ArrayList<>();
     private ADPackageInfo package_info = null;
+    private int total_packages = 0;
+    private String mSearchString = "";
+    private int mListType = 0;
 
     private static final String ns = null;
     boolean mDebug = true;
@@ -249,6 +254,7 @@ public class ADDownloadXml {
     }
 
     //////////////// tag consuming methods end /////////////////////////////
+
     public String  getFedUrl(String url) {
         try {
 
@@ -269,6 +275,12 @@ public class ADDownloadXml {
         }
         return url;
     }
+
+    public ArrayList<ADPackageInfo> getList() {return list;}
+    public int getTotalPackages() {return total_packages;}
+    public void setSearchString(String s) {mSearchString = s;}
+    public void setListType(int lt) {mListType = lt;}
+
     ////////////////////////////////////////////////////////////////////////
     /* metalink file ----------------------------- */
 
@@ -414,7 +426,8 @@ public class ADDownloadXml {
     /* metadata package file ----------------------------- */
 
     private void metadata() {
-        this.consumeStartTag(TAG_METADATA);
+        //String packages = mXpp.getAttributeValue(null,ATTR_PACKAGES);
+        total_packages = this.consumeStartTag(TAG_METADATA, ATTR_PACKAGES);
 
         mCount = 0;
         try {
@@ -494,10 +507,21 @@ public class ADDownloadXml {
             e.printStackTrace();
         }
 
-        if (!package_info.packageVersion.contentEquals("") &&
+        if ( (!package_info.packageVersion.contentEquals("") &&
                 !package_info.packageName.contentEquals("") &&
-                !package_info.packageSection.contentEquals("")) {
-            list.add(package_info);
+                !package_info.packageSection.contentEquals("")) || true) {
+
+            switch (mListType) {
+                case ADDownload.ACTION_GZIP_FILE_GET_URL_FED:
+                    list.add(package_info);
+
+                    break;
+                case ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED:
+                    break;
+                case ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
+                    break;
+            }
+            //list.add(package_info);
         }
         this.consumeEndTag(TAG_PACKAGE);
     }

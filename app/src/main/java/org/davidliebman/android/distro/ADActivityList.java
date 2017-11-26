@@ -442,6 +442,8 @@ public class ADActivityList extends ListActivity
                     break;
                 case ADDownload.ACTION_GZIP_FILE_GET_URL_FED:
                     if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
+                    listValues = download.getList(mListType);
+                    mDateDownload = download.getDateDownload();
                     break;
             }
 
