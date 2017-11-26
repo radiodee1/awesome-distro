@@ -281,45 +281,8 @@ public class ADDownload {
                     }
                 }
                 break;
-            //////////////////////move this!! ///////////////////////////
-            case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
-                for (int i = 0; i < mPackageList.size(); i ++ ) {
-                    if (mPackageList.get(i).packageSection.trim().endsWith(mSearchString.trim())) {
-                        //ADPackageInfo info = new ADPackageInfo();
+            
 
-                        sublist.add(mPackageList.get(i));
-                        //System.out.println(mSearchString);
-
-                    }
-                }
-                break;
-            case ACTION_GZIP_FILE_SHOW_SECTION_FED:
-                ArrayList<String> repeats_here = new ArrayList<>();
-
-                for (int i = 0; i < mList.size() ; i ++) {
-                    if (mList.get(i).startsWith(STRING_SECTION)) {
-                        String mSection = mList.get(i).substring((STRING_SECTION).length());
-                        if (!repeats_here.contains(mSection.trim())) {
-                            ADPackageInfo info = new ADPackageInfo();
-                            info.packageName = mSection;
-                            repeats_here.add(mSection.trim());
-                            sublist.add(info);
-                        }
-                    }
-                }
-                //fillPackageListFed();
-                break;
-            case ACTION_GZIP_FILE_GET_URL_FED:
-                for (int i = 0; i < mPackageList.size(); i ++ ) {
-                    if (mPackageList.get(i).packageSection.trim().endsWith(mSearchString.trim())) {
-                        //ADPackageInfo info = new ADPackageInfo();
-
-                        sublist.add(mPackageList.get(i));
-                        //System.out.println(mSearchString);
-
-                    }
-                }
-                break;
         }
 
         return sublist;
