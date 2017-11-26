@@ -34,6 +34,7 @@ public class ADDownload {
     private long mDateDownload = 0;
     private long mDateOld = 0;
     private ArrayList<String> mList = new ArrayList<>();
+    private ArrayList<ADPackageInfo> mListFed = new ArrayList<>();
     private ArrayList<ADPackageInfo> mPackageList = new ArrayList<>();
     private ArrayList<ADPackageInfo> mDBList = new ArrayList<>();
     private int mListType = 0;
@@ -139,17 +140,19 @@ public class ADDownload {
                 break;
             case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
                 //mFedUrl = getFedUrl();
-
+                mPackageList = getFedList();
+                //fillPackageListFed();
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
                 //mFedUrl = getFedUrl();
-
+                mListFed = getFedList();
+                fillPackageListFed();
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
                 try {
                     //mFedXml = new ADDownloadXml();
-                    mPackageList = getFedList();
-
+                    mListFed = getFedList();
+                    //fillPackageListFed();
                 }
                 catch (Exception e) {e.printStackTrace();}
 
@@ -301,7 +304,7 @@ public class ADDownload {
                         }
                     }
                 }
-                fillPackageList();
+                fillPackageListFed();
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
                 for (int i = 0; i < mPackageList.size(); i ++ ) {
@@ -470,6 +473,16 @@ public class ADDownload {
         }
         mList = new ArrayList<>();
         System.out.println("total packages from download " + mPackageList.size());
+    }
+
+    private void fillPackageListFed() {
+        ADPackageInfo packageInfo = new ADPackageInfo();
+        mPackageList = new ArrayList<>();
+        for (int i = 0; i < mListFed.size(); i ++ ) {
+            if(mListFed.get(i).packageSection.trim().contentEquals(mSearchString)) {
+                mPackageList.add(mListFed.get(i));
+            }
+        }
     }
 
     public void onDestroy() {

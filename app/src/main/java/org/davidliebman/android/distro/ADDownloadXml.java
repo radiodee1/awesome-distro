@@ -38,6 +38,9 @@ public class ADDownloadXml {
     private static final String ATTR_PREFERENCE = "preference";
     private static final String ATTR_HREF = "href";
     private static final String ATTR_PACKAGES = "packages";
+    private static final String ATTR_EPOCH = "epoch";
+    private static final String ATTR_VER = "ver";
+    private static final String ATTR_REL = "rel";
 
     private static final String VAL_HTTP = "http";
     private static final String VAL_HTTPS = "https";
@@ -53,6 +56,7 @@ public class ADDownloadXml {
     private int total_packages = 0;
     private String mSearchString = "";
     private int mListType = 0;
+    private String latestArch = "";
 
     private static final String ns = null;
     boolean mDebug = true;
@@ -469,9 +473,9 @@ public class ADDownloadXml {
                     //mXpp.next();
                 }
                 else if (mXpp.getEventType() == XmlPullParser.END_TAG &&
-                     !mXpp.getName().equalsIgnoreCase(TAG_PACKAGE)) {
+                     mXpp.getName().equalsIgnoreCase(TAG_PACKAGE)) {
                     loop = false;
-                    break;
+                    //break;
                 }
                 else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_NAME)) {
@@ -535,21 +539,37 @@ public class ADDownloadXml {
     }
     private void package_arch() {
         this.consumeStartTag(TAG_ARCH);
-        String arch = this.getText();
+        latestArch = this.getText();
         //
         this.consumeEndTag(TAG_ARCH);
 
     }
     private void package_version() {
-        this.consumeStartTag(TAG_VERSION);
-        String version = this.getText();
-        package_info.packageVersion = version;
+        String epoch = mXpp.getAttributeValue(null,ATTR_EPOCH);
+        String release = mXpp.getAttributeValue(null, ATTR_REL);
+        String version = mXpp.getAttributeValue(null, ATTR_VER);
+        int ep = Integer.valueOf(epoch) ;
+        //this.consumeStartTag(TAG_VERSION);
+        //String version = this.getText();
+        this.advanceToTag(TAG_VERSION);
+        package_info.packageVersion = version + "-" + release + "." + latestArch;
+        System.out.println(package_info.packageVersion);
         this.consumeEndTag(TAG_VERSION);
 
     }
     private void package_format() {
         this.consumeStartTag(TAG_FORMAT);
 
+        //this.advanceToTag(TAG_RPMGROUP);
+        format_group();
+        System.out.println("group "+ mCount);
         this.consumeEndTag(TAG_FORMAT);
+    }
+    private void format_group() {
+        this.consumeStartTag(TAG_RPMGROUP);
+        String section = this.getText();
+        System.out.println(section + " section");
+        package_info.packageSection = section;
+        this.consumeEndTag(TAG_RPMGROUP);
     }
 }
