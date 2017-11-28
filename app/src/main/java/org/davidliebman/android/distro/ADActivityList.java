@@ -234,7 +234,7 @@ public class ADActivityList extends ListActivity
     public boolean onKeyDown(int keycode, KeyEvent event) {
         if ((keycode == KeyEvent.KEYCODE_BACK) && listValues.size() > 0) {
 
-            System.out.println("keycode " + mListType);
+            //System.out.println("keycode " + mListType);
 
             if (mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB) {
                 mListType = ADDownload.ACTION_LIST_SHOW_SECTION_DEB;
@@ -319,6 +319,8 @@ public class ADActivityList extends ListActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // Check which request we're responding to
+        String old_url = string_url;
+
         boolean bool_do_as_upgrade = false;
         if (requestCode == INTENT_CONFIGURE) {
             // Make sure the request was successful
@@ -333,6 +335,10 @@ public class ADActivityList extends ListActivity
                 listValues = new ArrayList<>();
                 mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
                 checkUrlForFed();
+
+                if ( !string_url.contentEquals(old_url)){
+                    down = null;
+                }
 
                 if(string_url != null && ! string_url.isEmpty()) {
                     writePreferences(WRITE_PREFERENCES_URL);
@@ -433,23 +439,6 @@ public class ADActivityList extends ListActivity
         protected Void doInBackground(String... params) {
             //System.out.println(params[0]);
             int num = 0;
-            /*
-            if (params[0].endsWith(".gz")) {
-                //mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
-            }
-            else if (mListType != ADDownload.ACTION_GZIP_FILE_GET_URL_FED &&
-                    mListType != ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED &&
-                    mListType != ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED &&
-                    mListType != ADDownload.ACTION_GZIP_FILE_GET_URL_FED &&
-                    mListType != ADDownload.ACTION_LIST_SHOW_PACKAGE_FED &&
-                    mListType != ADDownload.ACTION_LIST_SHOW_SECTION_FED //&&
-                    //mListType != ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB &&
-                    //mListType != ADDownload.ACTION_LIST_SHOW_SECTION_DEB
-                    ){
-                //mListType = ADDownload.ACTION_TEXT_FILE_SHOW_ALL;
-            }
-            //download = new ADDownload(params[0], new Date(), mListType);
-            */
 
             switch (mListType) {
                 case ADDownload.ACTION_TEXT_FILE_SHOW_ALL:
@@ -549,7 +538,10 @@ public class ADActivityList extends ListActivity
                     mDateDownload = download.getDateDownload();
                     break;
             }
-
+            if (listValues.size() == 0) {
+                download = null;
+                // does this work??
+            }
             return null;
         }
 

@@ -145,19 +145,15 @@ public class ADDownload {
             case ACTION_LIST_SHOW_PACKAGE_FED:
                 break;
             case ACTION_LIST_SHOW_SECTION_FED:
-                //mPackageList = mListFed;
-                //mPackageList = getFedList();
-                //fillPackageListFed();
+
                 mListFed = mPackageList;
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
-                //mFedUrl = getFedUrl();
                 mPackageList = getFedList();
                 mListFed = mPackageList;
 
                 fillPackageListFed();
                 mSectionList = mPackageList;
-                System.out.println("after fillPackage");
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
 
@@ -179,8 +175,7 @@ public class ADDownload {
             mPackageList = this.getFedList();
         }
         else if (mListType == ACTION_LIST_SHOW_SECTION_FED ) {
-            //mPackageList = mSectionList;//this.getFedList();//mListFed;
-            System.out.println("getListFed "+ mListType);
+            //System.out.println("getListFed "+ mListType);
             return mSectionList;
         }
         return mPackageList;
