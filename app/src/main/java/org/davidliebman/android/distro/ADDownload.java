@@ -36,6 +36,7 @@ public class ADDownload {
     private ArrayList<String> mList = new ArrayList<>();
     private ArrayList<ADPackageInfo> mListFed = new ArrayList<>();
     private ArrayList<ADPackageInfo> mPackageList = new ArrayList<>();
+    private ArrayList<ADPackageInfo> mSectionList = new ArrayList<>();
     private ArrayList<ADPackageInfo> mDBList = new ArrayList<>();
     private int mListType = 0;
     private PackageDbHelper mDbHelper;
@@ -76,14 +77,7 @@ public class ADDownload {
         //public static final String COLUMN_NAME_ID = "id";
     }
 
-    /*
-    public ADDownload(String url, long old, int action, String search, ArrayList<ADPackageInfo> l) {
-        this(url,old,action);
 
-        mSearchString = search;
-        mListFed = l;
-    }
-    */
 
     public ADDownload(String url, long old, int action) {
         mUrl = url;
@@ -149,10 +143,12 @@ public class ADDownload {
                 break;
             case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
             case ACTION_LIST_SHOW_PACKAGE_FED:
+                break;
             case ACTION_LIST_SHOW_SECTION_FED:
                 //mPackageList = mListFed;
                 //mPackageList = getFedList();
                 //fillPackageListFed();
+                mListFed = mPackageList;
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
                 //mFedUrl = getFedUrl();
@@ -160,6 +156,7 @@ public class ADDownload {
                 mListFed = mPackageList;
 
                 fillPackageListFed();
+                mSectionList = mPackageList;
                 System.out.println("after fillPackage");
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
@@ -178,8 +175,13 @@ public class ADDownload {
     public void setListType(int l) {mListType = l;}
     public ArrayList<ADPackageInfo> getListUnsorted() {return mListFed;}
     public ArrayList<ADPackageInfo> getListFed() {
-        if (mListType == ACTION_GZIP_FILE_SHOW_PACKAGE_FED) {
+        if (mListType == ACTION_GZIP_FILE_SHOW_PACKAGE_FED ) {
             mPackageList = this.getFedList();
+        }
+        else if (mListType == ACTION_LIST_SHOW_SECTION_FED ) {
+            //mPackageList = mSectionList;//this.getFedList();//mListFed;
+            System.out.println("getListFed "+ mListType);
+            return mSectionList;
         }
         return mPackageList;
     }

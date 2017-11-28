@@ -11,6 +11,8 @@ import android.os.Bundle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -22,6 +24,7 @@ import android.widget.Toast;
 public class ADActivityList extends ListActivity
         implements ADDialogQuestion.ADDialogQuestionInterface {
 
+    private boolean mDebug = true;
     private long mDateOld = 0;
     private long mDateDownload = 0;
     private long mDateShowing = 0;
@@ -164,7 +167,8 @@ public class ADActivityList extends ListActivity
         ADPackageInfo selectedItem = listValues.get(position);
 
         //text.setText("You clicked " + selectedItem.packageName + " at position " + position);
-        if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED &&
+        if ((mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED ||
+                mListType == ADDownload.ACTION_LIST_SHOW_SECTION_FED) &&
                 down != null &&
                 down.getStatus() == AsyncTask.Status.FINISHED) {
 
@@ -226,6 +230,41 @@ public class ADActivityList extends ListActivity
 
     }
 
+    @Override
+    public boolean onKeyDown(int keycode, KeyEvent event) {
+        if ((keycode == KeyEvent.KEYCODE_BACK) && listValues.size() > 0) {
+
+            System.out.println("keycode " + mListType);
+
+            if (mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB) {
+                mListType = ADDownload.ACTION_LIST_SHOW_SECTION_DEB;
+                down = new DownloadFilesTask();
+                down.execute(getDistroURL());
+            }
+            else if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB) {
+                mListType = ADDownload.ACTION_LIST_SHOW_SECTION_DEB;
+                down = new DownloadFilesTask();
+                down.execute(getDistroURL());
+            }
+            else if (mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_FED) {
+                mListType = ADDownload.ACTION_LIST_SHOW_SECTION_FED;
+                down = new DownloadFilesTask();
+                down.execute(getDistroURL());
+            }
+            else if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED) {
+                mListType = ADDownload.ACTION_LIST_SHOW_SECTION_FED;
+                down = new DownloadFilesTask();
+                down.execute(getDistroURL());
+            }
+            else {
+                return super.onKeyDown(keycode,event);
+            }
+        }
+        else return super.onKeyDown(keycode, event);
+
+        return true; //super.onKeyDown(keycode, event);
+    }
+
     public void showDialog() {
         ADDialogQuestion dialog = new ADDialogQuestion();
         dialog.show(getFragmentManager(), "button_check");
@@ -263,7 +302,7 @@ public class ADActivityList extends ListActivity
 
     @Override
     protected void onDestroy() {
-        download.onDestroy();
+        //download.onDestroy();
         super.onDestroy();
     }
 

@@ -60,7 +60,7 @@ public class ADDownloadXml {
     private String latestArch = "";
 
     private static final String ns = null;
-    boolean mDebug = true;
+    boolean mDebug = false;
     int mCount = 0;
     int mCountLimit = -1;
     boolean mFoundGzUrl = false;
