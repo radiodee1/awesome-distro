@@ -62,6 +62,7 @@ public class ADDownloadXml {
     private static final String ns = null;
     boolean mDebug = true;
     int mCount = 0;
+    int mCountLimit = -1;
     boolean mFoundGzUrl = false;
 
     public ADDownloadXml (String baseUrl) {
@@ -260,7 +261,7 @@ public class ADDownloadXml {
                     if(mXpp.getEventType() == XmlPullParser.END_TAG) depth --;
                     if(mXpp.getEventType() == XmlPullParser.START_TAG) depth ++;
                     if(checkDepth && depth < 0) {
-                        System.out.println("depth bad "+ in);
+                        if (mDebug) System.out.println("depth bad "+ in);
                         return;
                     }
 
@@ -319,7 +320,7 @@ public class ADDownloadXml {
         //this.consumeStartTag(TAG_METALINK);
 
         this.advanceToTag(TAG_FILES);
-        System.out.println("metalink");
+        if (mDebug)System.out.println("metalink");
         files();
 
         this.consumeEndTag(TAG_METALINK);
@@ -327,14 +328,14 @@ public class ADDownloadXml {
 
     private void files() {
         this.consumeStartTag(TAG_FILES);
-        System.out.println("files");
+        if (mDebug) System.out.println("files");
         file();
         this.consumeEndTag(TAG_FILES);
     }
 
     private void file() {
         this.consumeStartTag(TAG_FILE);
-        this.advanceToTag(TAG_RESOURCES);
+        this.advanceToTag(TAG_RESOURCES,true);
         resources();
         this.consumeEndTag(TAG_FILE);
     }
@@ -346,13 +347,13 @@ public class ADDownloadXml {
             /* technique for multiple identical tags */
             this.advanceToTag(TAG_URL);
             url();
-            //mXpp.next();
+            mXpp.next();
             this.advanceToTag(TAG_URL);
             while (mXpp.getEventType() == XmlPullParser.END_TAG &&
                     mXpp.getName().equalsIgnoreCase(TAG_URL)) {
 
                 mXpp.next();
-                this.advanceToTag(TAG_URL);
+                this.advanceToTag(TAG_URL,false);
                 if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_URL)) {
                     url();
@@ -362,6 +363,7 @@ public class ADDownloadXml {
         }
         catch (Exception e) {
             System.out.println("exception url pos");
+            e.printStackTrace();
         }
         this.consumeEndTag(TAG_RESOURCES);
     }
@@ -372,12 +374,12 @@ public class ADDownloadXml {
         String type = mXpp.getAttributeValue(null, ATTR_TYPE);
         String preference = mXpp.getAttributeValue(null, ATTR_PREFERENCE);
         String newUrl = this.getText();
-        if ((protocol.contentEquals(VAL_HTTP) || protocol.contentEquals(VAL_HTTPS)) &&
+        if (true || (protocol.contentEquals(VAL_HTTP) || protocol.contentEquals(VAL_HTTPS)) &&
                 (type.contentEquals(VAL_HTTPS) || type.contentEquals(VAL_HTTP)) &&
-                (url.contentEquals("") || true)) {
+                (url.contentEquals("") )) {
             url = getFedUrl( newUrl.trim());
         }
-        System.out.println(url+ " new url ");
+        if (mDebug) System.out.println(url+ " new url ");
         this.consumeEndTag(TAG_URL);
     }
 
@@ -408,7 +410,7 @@ public class ADDownloadXml {
                 }
             }
 
-            System.out.println("new url " + url);
+            if (mDebug) System.out.println("new url " + url);
 
         }
         catch (Exception e) {
@@ -422,7 +424,7 @@ public class ADDownloadXml {
             this.advanceToTag(TAG_DATA);
             String mDataType = mXpp.getAttributeValue(null, ATTR_TYPE);
 
-            System.out.println(mDataType + " -- " + mXpp.getName());
+            if (mDebug) System.out.println(mDataType + " -- " + mXpp.getName());
             this.consumeStartTag(TAG_DATA);
 
 
@@ -430,7 +432,7 @@ public class ADDownloadXml {
                 //this.consumeStartTag(TAG_DATA);
                 this.advanceToTag(TAG_LOCATION);
                 //mXpp.next();
-                System.out.println("content equals " + VAL_PRIMARY);
+                if (mDebug) System.out.println("content equals " + VAL_PRIMARY);
                 mFoundGzUrl = true;
                 location();
             }
@@ -443,13 +445,13 @@ public class ADDownloadXml {
     private void location() {
         this.consumeStartTag(TAG_LOCATION);
         String mLocation = mXpp.getAttributeValue(null,ATTR_HREF);
-        System.out.println(mLocation);
+        if (mDebug) System.out.println(mLocation);
 
         String mBase = baseUrl;
         String mNewUrl = mBase.substring(0, mBase.length() - URL_PART_ENDING.length()) + mLocation;
         url = mNewUrl;
         //if (url.contentEquals("")) url = mNewUrl;
-        System.out.println(url + " package url");
+        if (mDebug) System.out.println(url + " package url");
 
         this.consumeEndTag(TAG_LOCATION);
     }
@@ -460,7 +462,7 @@ public class ADDownloadXml {
         //String packages = mXpp.getAttributeValue(null,ATTR_PACKAGES);
         total_packages = this.consumeStartTag(TAG_METADATA, ATTR_PACKAGES);
 
-        System.out.println(total_packages + " tot <------------");
+        //System.out.println(total_packages + " tot <------------");
 
         mCount = 0;
         try {
@@ -470,14 +472,14 @@ public class ADDownloadXml {
             metadata_package();
             //mXpp.next();
             //this.advanceToTag(TAG_PACKAGE);
-            while (mCount < 10 &&
+            while ((mCount < mCountLimit || mCountLimit == -1) &&
                     mXpp.getEventType() == XmlPullParser.END_TAG &&
                     //mXpp.getName() != null &&
                     mXpp.getName().equalsIgnoreCase(TAG_PACKAGE)
                     ) {
-                System.out.println(total_packages + " tot loop <------------");
+                //System.out.println(total_packages + " tot loop <------------");
 
-                
+
 
                 mXpp.next();
                 this.advanceToTag(TAG_PACKAGE,true);
@@ -489,7 +491,7 @@ public class ADDownloadXml {
 
 
                 //this.advanceToTag(TAG_PACKAGE);
-                System.out.println(total_packages + " tot loop 2 <------------");
+                //System.out.println(total_packages + " tot loop 2 <------------");
 
                 //mXpp.next();
             }
@@ -547,7 +549,7 @@ public class ADDownloadXml {
                     //continue;
                     //loop = false;
 
-                    System.out.println("package_format");
+                    if (mDebug) System.out.println("package_format");
                 }
 
                 else {
@@ -596,7 +598,7 @@ public class ADDownloadXml {
         this.consumeStartTag(TAG_VERSION);
         //String version = this.getText();
         package_info.packageVersion = version + "-" + release + "." + latestArch;
-        System.out.println(package_info.packageVersion +" " + mCount);
+        if (mDebug) System.out.println(package_info.packageVersion +" " + mCount);
         this.consumeEndTag(TAG_VERSION);
 
     }
@@ -606,14 +608,14 @@ public class ADDownloadXml {
 
         this.advanceToTag(TAG_RPMGROUP);
         format_group();
-        System.out.println("group "+ mCount);
+        if (mDebug) System.out.println("group "+ mCount);
         //this.advanceToTag(TAG_FORMAT);
         this.consumeEndTag(TAG_FORMAT);
     }
     private void format_group() {
         this.consumeStartTag(TAG_RPMGROUP);
         String section = this.getText();
-        System.out.println(section + " section");
+        if (mDebug) System.out.println(section + " section");
         package_info.packageSection = section;
         if (package_info.packageSection.trim().contentEquals("")) {
             package_info.packageSection = "[default]";

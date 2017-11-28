@@ -209,7 +209,7 @@ public class ADDownload {
                     mUrl = mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
 
                 }
-                //System.out.println(mUrl + " -- url");
+                System.out.println(mUrl + " -- url");
                 System.out.println(mFedXml.url + " --debug");
                 String mFedUrl = mFedXml.url;
 
