@@ -201,19 +201,22 @@ public class ADDownload {
                     mUrl = mUrl.trim().substring(BASEURL.length())
                             + "repodata/repomd.xml";
                     //return mUrl;
-                } else if (mUrl.trim().startsWith(METALINK))
+                    mFedXml.url = mUrl;
+
+                } else if (mUrl.trim().startsWith(METALINK)) {
                     mUrl = mUrl.trim().substring(METALINK.length());
+                //}
+                    mUrl = mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
 
-                mUrl = mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
-
+                }
                 //System.out.println(mUrl + " -- url");
-                //System.out.println(mFedXml.url + " --debug");
+                System.out.println(mFedXml.url + " --debug");
                 String mFedUrl = mFedXml.url;
 
                 ////////////////////////////////////////////
                 mFedXml = new ADDownloadXml(mFedUrl);
 
-                //System.out.println(mFedUrl + " test url 1");
+                System.out.println(mFedUrl + " test url 1");
 
                 mUrl = mFedXml.parseFindPackagelist(inputStreamXmlFile(mFedUrl));
 

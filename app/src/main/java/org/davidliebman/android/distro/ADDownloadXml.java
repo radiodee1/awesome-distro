@@ -32,6 +32,7 @@ public class ADDownloadXml {
     private static final String TAG_VERSION = "version";
     private static final String TAG_FORMAT = "format";
     private static final String TAG_RPMGROUP = "rpm:group";
+    private static final String TAG_TAGS = "tags";
 
     private static final String ATTR_PROTOCOL = "protocol";
     private static final String ATTR_TYPE = "type";
@@ -236,13 +237,39 @@ public class ADDownloadXml {
     }
 
     public void advanceToTag(String in) {
+        advanceToTag(in, true);
+    }
+
+    public void advanceToTag(String in, boolean checkDepth) {
         try {
-            if (in != null && mXpp.getName() != null) {
+            int depth = 0;
+
+            if (in != null ) {
+                if ((mXpp.getName() != null && mXpp.getName().contentEquals(in)) ||
+                        mXpp.getEventType() == XmlPullParser.END_DOCUMENT) {
+                    return;
+                }
+
+
                 boolean test = true;
-                while (test && !mXpp.getName().contentEquals(in)) {
-                    if (mDebug) System.out.println(mXpp.getPositionDescription());
+                while (test ){
+                    //if (mDebug) System.out.println(mXpp.getPositionDescription());
                     mXpp.next();
-                    if (mXpp.getName() == null) test = false;
+                    //if (mXpp.getName() == null ) mXpp.next();
+
+                    if(mXpp.getEventType() == XmlPullParser.END_TAG) depth --;
+                    if(mXpp.getEventType() == XmlPullParser.START_TAG) depth ++;
+                    if(checkDepth && depth < 0) {
+                        System.out.println("depth bad "+ in);
+                        return;
+                    }
+
+                    if ((mXpp.getEventType() == XmlPullParser.START_TAG ||
+                        mXpp.getEventType() == XmlPullParser.END_TAG) &&
+                            mXpp.getName() != null &&
+                            mXpp.getName().contentEquals(in)) {
+                        test = false;
+                    }
                 }
             }
             else {
@@ -358,7 +385,7 @@ public class ADDownloadXml {
 
     private void repomd() {
         this.consumeStartTag(TAG_REPOMD);
-        this.advanceToTag(TAG_DATA);
+        //this.advanceToTag(TAG_DATA); // <-------------
 
         mFoundGzUrl = false;
         //data();
@@ -368,14 +395,14 @@ public class ADDownloadXml {
             this.advanceToTag(TAG_DATA);
             data();
             //mXpp.next();
-            this.advanceToTag(TAG_DATA);
+            //this.advanceToTag(TAG_DATA);
             while (mXpp.getEventType() == XmlPullParser.END_TAG &&
                     mXpp.getName().equalsIgnoreCase(TAG_DATA)) {
 
                 mXpp.next();
-                this.advanceToTag(TAG_DATA);
+                this.advanceToTag(TAG_DATA,true);
                 if (mXpp.getEventType() == XmlPullParser.START_TAG &&
-                        mXpp.getName().equalsIgnoreCase(TAG_DATA) && !mFoundGzUrl) {
+                        mXpp.getName().equalsIgnoreCase(TAG_DATA) ) {
                     data();
 
                 }
@@ -396,7 +423,7 @@ public class ADDownloadXml {
             String mDataType = mXpp.getAttributeValue(null, ATTR_TYPE);
 
             System.out.println(mDataType + " -- " + mXpp.getName());
-            //this.consumeStartTag(TAG_DATA);
+            this.consumeStartTag(TAG_DATA);
 
 
             if (mDataType.contentEquals(VAL_PRIMARY)) {
@@ -407,7 +434,7 @@ public class ADDownloadXml {
                 mFoundGzUrl = true;
                 location();
             }
-
+            //this.advanceToTag(TAG_DATA);
             this.consumeEndTag(TAG_DATA);
         }
         catch (Exception e) {e.printStackTrace();}
@@ -433,6 +460,8 @@ public class ADDownloadXml {
         //String packages = mXpp.getAttributeValue(null,ATTR_PACKAGES);
         total_packages = this.consumeStartTag(TAG_METADATA, ATTR_PACKAGES);
 
+        System.out.println(total_packages + " tot <------------");
+
         mCount = 0;
         try {
 
@@ -440,23 +469,36 @@ public class ADDownloadXml {
             this.advanceToTag(TAG_PACKAGE);
             metadata_package();
             //mXpp.next();
-            this.advanceToTag(TAG_PACKAGE);
-            while (mCount < 10 && mXpp.getEventType() == XmlPullParser.END_TAG &&
-                    mXpp.getName().equalsIgnoreCase(TAG_PACKAGE)) {
+            //this.advanceToTag(TAG_PACKAGE);
+            while (mCount < 10 &&
+                    mXpp.getEventType() == XmlPullParser.END_TAG &&
+                    //mXpp.getName() != null &&
+                    mXpp.getName().equalsIgnoreCase(TAG_PACKAGE)
+                    ) {
+                System.out.println(total_packages + " tot loop <------------");
+
+                
 
                 mXpp.next();
-                this.advanceToTag(TAG_PACKAGE);
+                this.advanceToTag(TAG_PACKAGE,true);
                 if (mXpp.getEventType() == XmlPullParser.START_TAG &&
-                        mXpp.getName().equalsIgnoreCase(TAG_PACKAGE)) {
+                        mXpp.getName().contentEquals(TAG_PACKAGE)) {
                     metadata_package();
-
+                    //this.advanceToTag(TAG_PACKAGE);
                 }
+
+
+                //this.advanceToTag(TAG_PACKAGE);
+                System.out.println(total_packages + " tot loop 2 <------------");
+
+                //mXpp.next();
             }
         }
         catch (Exception e) {
             System.out.println("exception ");
             e.printStackTrace();
         }
+        //this.advanceToTag(TAG_METADATA);
         this.consumeEndTag(TAG_METADATA);
     }
 
@@ -467,45 +509,54 @@ public class ADDownloadXml {
         try {
             //System.out.println(mCount + " <--" );
             boolean loop = true;
-
+            int checkRun = 0;
             while (loop ){
                 if (mXpp.getName() == null) {
                     //mXpp.next();
                 }
-                else if (mXpp.getEventType() == XmlPullParser.END_TAG &&
-                     mXpp.getName().equalsIgnoreCase(TAG_PACKAGE)) {
+                else if (checkRun > 10 || mXpp.getEventType() == XmlPullParser.END_DOCUMENT
+                        || (mXpp.getEventType() == XmlPullParser.END_TAG &&
+                     mXpp.getName().equalsIgnoreCase(TAG_PACKAGE))) {
                     loop = false;
-                    //break;
+                    break;
                 }
                 else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_NAME)) {
                     package_name();
+                    checkRun ++;
                     //System.out.println("package_name");
                 }
                 else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_ARCH)) {
                     package_arch();
+                    checkRun ++;
                     //continue;
                     //System.out.println("package_arch");
                 }
                 else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_VERSION)) {
                     package_version();
+                    checkRun ++;
                     //System.out.println("package_version");
                     //continue;
                 }
                 else if (mXpp.getEventType() == XmlPullParser.START_TAG &&
                         mXpp.getName().equalsIgnoreCase(TAG_FORMAT)) {
                     package_format();
+                    checkRun ++;
                     //continue;
-                    //System.out.println("package_format");
+                    //loop = false;
+
+                    System.out.println("package_format");
                 }
+
                 else {
                     mXpp.next();
-                    continue;
+                    //continue;
                 }
-                mXpp.next();
+                if (true ) mXpp.next();
             }
+
         }
         catch (Exception e){
             e.printStackTrace();
@@ -515,22 +566,10 @@ public class ADDownloadXml {
                 !package_info.packageName.contentEquals("") &&
                 !package_info.packageSection.contentEquals("")) || true) {
 
-            /*
-            switch (mListType) {
-                case ADDownload.ACTION_GZIP_FILE_GET_URL_FED:
-                    list.add(package_info);
-
-                    break;
-                case ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED:
-                    list.add(package_info);
-                    break;
-                case ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
-                    list.add(package_info);
-                    break;
-            }
-            */
             list.add(package_info);
         }
+        //this.advanceToTag(TAG_PACKAGE);
+
         this.consumeEndTag(TAG_PACKAGE);
     }
 
@@ -553,27 +592,33 @@ public class ADDownloadXml {
         String release = mXpp.getAttributeValue(null, ATTR_REL);
         String version = mXpp.getAttributeValue(null, ATTR_VER);
         int ep = Integer.valueOf(epoch) ;
-        //this.consumeStartTag(TAG_VERSION);
-        //String version = this.getText();
         this.advanceToTag(TAG_VERSION);
+        this.consumeStartTag(TAG_VERSION);
+        //String version = this.getText();
         package_info.packageVersion = version + "-" + release + "." + latestArch;
-        //System.out.println(package_info.packageVersion);
+        System.out.println(package_info.packageVersion +" " + mCount);
         this.consumeEndTag(TAG_VERSION);
 
     }
     private void package_format() {
+        //this.advanceToTag(TAG_FORMAT);
         this.consumeStartTag(TAG_FORMAT);
 
-        //this.advanceToTag(TAG_RPMGROUP);
+        this.advanceToTag(TAG_RPMGROUP);
         format_group();
-        //System.out.println("group "+ mCount);
+        System.out.println("group "+ mCount);
+        //this.advanceToTag(TAG_FORMAT);
         this.consumeEndTag(TAG_FORMAT);
     }
     private void format_group() {
         this.consumeStartTag(TAG_RPMGROUP);
         String section = this.getText();
-        //System.out.println(section + " section");
+        System.out.println(section + " section");
         package_info.packageSection = section;
+        if (package_info.packageSection.trim().contentEquals("")) {
+            package_info.packageSection = "[default]";
+            //System.exit(0);
+        }
         this.consumeEndTag(TAG_RPMGROUP);
     }
 }

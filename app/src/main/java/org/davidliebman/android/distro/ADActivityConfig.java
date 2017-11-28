@@ -449,6 +449,7 @@ public class ADActivityConfig extends AppCompatActivity
         docs.add(R.raw.fedora_repo);
         docs.add(R.raw.fedora_updates_repo);
         docs.add(R.raw.fedora_updates_testing_repo);
+        docs.add(R.raw.fedora_cisco_openh264_repo);
 
         listName.clear();
         listUrl.clear();
