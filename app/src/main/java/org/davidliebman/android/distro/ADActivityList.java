@@ -110,6 +110,15 @@ public class ADActivityList extends ListActivity
                     down = new DownloadFilesTask();
                     down.execute(getDistroURL());
                 }
+                else if (mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_FED ||
+                        mListType == ADDownload.ACTION_LIST_UPDATE_PACKAGE_FED) {
+                    //mListType = ADDownload.ACTION_LIST_SHOW_SECTION_FED;
+                    mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED;
+                    checkUrlForFed();
+                    down = new DownloadFilesTask();
+                    down.execute(getDistroURL());
+                }
+                
                 else {
                     mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
                     checkUrlForFed();
@@ -141,8 +150,8 @@ public class ADActivityList extends ListActivity
         if (string_url.startsWith(BASEURL) || string_url.startsWith(METALINK)) {
             if (mListType == ADDownload.ACTION_LIST_SHOW_SECTION_DEB) mListType = ADDownload.ACTION_LIST_SHOW_SECTION_FED;
             if (mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB) mListType = ADDownload.ACTION_LIST_SHOW_PACKAGE_FED;
-            if (mListType == ADDownload.ACTION_LIST_UPDATE_PACKAGE_DEB) mListType = ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED;
-            if (mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_DEB) mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED;
+            if (mListType == ADDownload.ACTION_LIST_UPDATE_PACKAGE_DEB) mListType = ADDownload.ACTION_LIST_UPDATE_PACKAGE_FED;
+            if (mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_DEB) mListType = ADDownload.ACTION_LIST_UPDATE_SECTION_FED;
             if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_DEB) mListType = ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED;
             if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB) mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED;
 
@@ -256,11 +265,16 @@ public class ADActivityList extends ListActivity
                 down = new DownloadFilesTask();
                 down.execute(getDistroURL());
             }
+            else if (mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_FED) {
+                mListType = ADDownload.ACTION_LIST_SHOW_SECTION_FED;
+                down = new DownloadFilesTask();
+                down.execute(getDistroURL());
+            }
             else {
-                return super.onKeyDown(keycode,event);
+                return true; // super.onKeyDown(keycode,event);
             }
         }
-        else return super.onKeyDown(keycode, event);
+        else return true;//super.onKeyDown(keycode, event);
 
         return true; //super.onKeyDown(keycode, event);
     }
@@ -273,10 +287,12 @@ public class ADActivityList extends ListActivity
 
 
     public void showList() {
-        if (mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB ||
+        if ((mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_DEB ||
                 mListType == ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED ||
-                mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_FED) {
+                mListType == ADDownload.ACTION_LIST_SHOW_PACKAGE_FED) &&
+                download != null) {
 
+            //if (download == null) return;
             ArrayList<ADPackageInfo> chosen = download.getWatchedPackages(mContext);
             myAdapter = new ADListAdapter(this, listValues, chosen);
 
@@ -424,7 +440,9 @@ public class ADActivityList extends ListActivity
                     mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_DEB ||
                     mListType == ADDownload.ACTION_GZIP_FILE_GET_URL_FED ||
                     mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED ||
-                    mListType == ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED) {
+                    mListType == ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED ||
+                    mListType == ADDownload.ACTION_LIST_UPDATE_PACKAGE_FED ||
+                    mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_FED) {
                 progressBar.setMessage("Please wait");
                 progressBar.show();
                 progressBar.setIndeterminate(true);
@@ -474,6 +492,7 @@ public class ADActivityList extends ListActivity
                     listValues = download.getListFed();
                     break;
                 case ADDownload.ACTION_LIST_UPDATE_PACKAGE_DEB:
+                case ADDownload.ACTION_LIST_UPDATE_PACKAGE_FED:
                     readPreferences();
                     if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
                     download.setDateOld(mDateOld);
@@ -482,6 +501,7 @@ public class ADActivityList extends ListActivity
 
                     break;
                 case ADDownload.ACTION_LIST_UPDATE_SECTION_DEB:
+                case ADDownload.ACTION_LIST_UPDATE_SECTION_FED:
                     readPreferences();
                     if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
                     download.setDateOld(mDateOld);
@@ -538,7 +558,11 @@ public class ADActivityList extends ListActivity
                     mDateDownload = download.getDateDownload();
                     break;
             }
-            if (listValues.size() == 0) {
+            if (listValues.size() == 0
+                    //&&
+                    //mListType != ADDownload.ACTION_LIST_UPDATE_SECTION_FED &&
+                    //mListType != ADDownload.ACTION_LIST_UPDATE_PACKAGE_FED
+                    ) {
                 download = null;
                 // does this work??
             }

@@ -61,6 +61,8 @@ public class ADDownload {
     public static final int ACTION_GZIP_FILE_GET_URL_FED = 16;
     public static final int ACTION_LIST_SHOW_PACKAGE_FED = 17;
     public static final int ACTION_LIST_SHOW_SECTION_FED = 18;
+    public static final int ACTION_LIST_UPDATE_PACKAGE_FED = 19;
+    public static final int ACTION_LIST_UPDATE_SECTION_FED = 20;
 
     public static final String STRING_PACKAGE = "Package: ";
     public static final String STRING_VERSION = "Version: ";
@@ -141,19 +143,38 @@ public class ADDownload {
 
                 fillPackageList();
                 break;
+            case ACTION_LIST_UPDATE_PACKAGE_FED:
+
+                break;
+            case ACTION_LIST_UPDATE_SECTION_FED:
+
+                if (mSectionList.size() > 0) {
+                    mPackageList = mSectionList;
+                    fillPackageListFed();
+                    break;
+                }
+
+                mPackageList = getFedList();
+                mListFed = mPackageList;
+
+                fillPackageListFed();
+                mSectionList = (ArrayList<ADPackageInfo>) mPackageList.clone();
+                break;
+
             case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
             case ACTION_LIST_SHOW_PACKAGE_FED:
                 break;
             case ACTION_LIST_SHOW_SECTION_FED:
 
                 mListFed = mPackageList;
+                fillPackageListFed();// <------------
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
                 mPackageList = getFedList();
                 mListFed = mPackageList;
 
                 fillPackageListFed();
-                mSectionList = mPackageList;
+                mSectionList = (ArrayList<ADPackageInfo>) mPackageList.clone();
                 break;
             case ACTION_GZIP_FILE_GET_URL_FED:
 
@@ -190,7 +211,10 @@ public class ADDownload {
 
     public ArrayList<ADPackageInfo>  getFedList() {
         try {
-            if (mListType == ACTION_GZIP_FILE_SHOW_SECTION_FED) {
+            if (mListType == ACTION_GZIP_FILE_SHOW_SECTION_FED ||
+                    (mListType == ACTION_LIST_UPDATE_SECTION_FED &&
+                            (mSectionList == null || mSectionList.size() == 0))
+                    ) {
                 String METALINK = "metalink=";
                 String BASEURL = "baseurl=";
 
@@ -232,9 +256,16 @@ public class ADDownload {
             }
             else if(mListType == ACTION_GZIP_FILE_SHOW_PACKAGE_FED ||
                     mListType == ACTION_LIST_SHOW_PACKAGE_FED ||
-                    mListType == ACTION_LIST_SHOW_SECTION_FED) {
+                    mListType == ACTION_LIST_SHOW_SECTION_FED  ||
+                    mListType == ACTION_LIST_UPDATE_SECTION_FED
+                    ) {
 
-                mPackageList = mListFed;
+                if (mSectionList != null && mSectionList.size() > 0){
+                    mPackageList = mSectionList;
+                }
+                else {
+                    mPackageList = mListFed;
+                }
                 fillPackageListFed();
                 System.out.println("getFedList()");
                 return mPackageList;
@@ -317,9 +348,11 @@ public class ADDownload {
 
         switch (mListType) {
             case ACTION_LIST_UPDATE_PACKAGE_DEB:
+            case ACTION_LIST_UPDATE_PACKAGE_FED:
                 processNew(context);
                 break;
             case ACTION_LIST_UPDATE_SECTION_DEB:
+            case ACTION_LIST_UPDATE_SECTION_FED:
                 processNew(context);
                 break;
         }
@@ -468,6 +501,8 @@ public class ADDownload {
 
         switch (mListType) {
             case ACTION_GZIP_FILE_GET_URL_FED:
+            case ACTION_LIST_UPDATE_SECTION_FED:
+            case ACTION_LIST_UPDATE_PACKAGE_FED:
 
                 for (int i = 0; i < mPackageList.size(); i ++ ) {
                     if(true || mPackageList.get(i).packageSection.trim().contentEquals(mSearchString)) {
@@ -476,6 +511,7 @@ public class ADDownload {
                 }
                 break;
             case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
+            //case ACTION_LIST_UPDATE_PACKAGE_FED:
                 System.out.println("seaarch " + mSearchString);
                 for (int i = 0; i < mPackageList.size(); i ++ ) {
                     if (mPackageList.get(i).packageSection.trim().contentEquals(mSearchString.trim())) {
@@ -488,6 +524,8 @@ public class ADDownload {
                 }
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
+            //case ACTION_LIST_UPDATE_SECTION_FED:
+
                 ArrayList<String> repeats_here = new ArrayList<>();
 
                 for (int i = 0; i < mPackageList.size() ; i ++) {
@@ -503,6 +541,8 @@ public class ADDownload {
                 }
                 //fillPackageListFed();
                 break;
+
+
         }
 
         System.out.println("length " + mPackageListOut.size());
