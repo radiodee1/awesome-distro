@@ -269,7 +269,7 @@ public class ADDownload {
                     //mListType == ACTION_LIST_UPDATE_SECTION_FED
                     ) {
 
-                if (mSectionList != null && mSectionList.size() > 0 && false){
+                if (mSectionList != null && mSectionList.size() > 0 && mListFed.size() == 0){
                     mPackageList = mSectionList;
                 }
                 else {
@@ -535,7 +535,7 @@ public class ADDownload {
             case ACTION_LIST_SHOW_SECTION_FED:
 
                 //if (mPackageList.size() == 0) break;
-                mPackageList = mSectionList;
+                //mPackageList = mSectionList;
 
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
 

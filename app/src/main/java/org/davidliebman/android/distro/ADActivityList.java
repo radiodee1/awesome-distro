@@ -266,14 +266,15 @@ public class ADActivityList extends ListActivity
                 down = new DownloadFilesTask();
                 down.execute(getDistroURL());
             }
-            else if (mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_FED) {
+            else if (false && mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_FED) {
                 mListType = ADDownload.ACTION_LIST_SHOW_SECTION_FED;
                 down = new DownloadFilesTask();
                 down.execute(getDistroURL());
             }
             else {
-                return true; // super.onKeyDown(keycode,event);
+                //return true; // super.onKeyDown(keycode,event);
             }
+            System.out.println("back key " + mListType);
         }
         else return true;//super.onKeyDown(keycode, event);
 
@@ -307,7 +308,7 @@ public class ADActivityList extends ListActivity
         text.setText(getDistroURL());
         date.setText(new Date(mDateDownload).toString());
 
-        //System.out.println("show list "+ mListType);
+        System.out.println("show list "+ mListType);
     }
 
     public String getDistroURL() {
