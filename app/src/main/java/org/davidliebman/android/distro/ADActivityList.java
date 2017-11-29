@@ -307,7 +307,7 @@ public class ADActivityList extends ListActivity
         text.setText(getDistroURL());
         date.setText(new Date(mDateDownload).toString());
 
-        System.out.println("show list "+ mListType);
+        //System.out.println("show list "+ mListType);
     }
 
     public String getDistroURL() {
@@ -428,7 +428,7 @@ public class ADActivityList extends ListActivity
                 PREFERENCES_FILE_KEY, Context.MODE_PRIVATE);
         mDateOld = sharedPref.getLong(PREFERENCES_DATE_OLD_KEY, 0);
         string_url = sharedPref.getString(PREFERENCES_URL_KEY, "");
-        System.out.println("date from preferences " + new Date(mDateOld));
+        //System.out.println("date from preferences " + new Date(mDateOld));
     }
 
     ////////////////////////////////////////
@@ -540,13 +540,13 @@ public class ADActivityList extends ListActivity
                     download.deleteDB(ADActivityList.this);
                     break;
                 case ADDownload.ACTION_GZIP_FILE_GET_URL_FED:
-                    System.out.println("url fed");
+                    //System.out.println("url fed");
                     if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
                     listValues = download.getListFed();
                     mDateDownload = download.getDateDownload();
                     break;
                 case ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
-                    System.out.println("package fed");
+                    //System.out.println("package fed");
                     if (download == null ) download = new ADDownload(params[0], mDateOld, mListType);
                     download.setListType(mListType);
                     download.setSearchString(mSearchStringFed);
@@ -555,7 +555,7 @@ public class ADActivityList extends ListActivity
                     mDateDownload = download.getDateDownload();
                     break;
                 case ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED:
-                    System.out.println("section fed");
+                    //System.out.println("section fed");
                     if (download == null) download = new ADDownload(params[0], mDateOld, mListType);
                     listValues = download.getListFed();
                     mDateDownload = download.getDateDownload();

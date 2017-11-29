@@ -101,7 +101,7 @@ public class ADDownload {
         if (true || mDateUrl.contentEquals(mUrl)) {
             downloadDate(mDateUrl);
         }
-        System.out.println("date from download " + new Date(mDateDownload));
+        //System.out.println("date from download " + new Date(mDateDownload));
 
         switch (action) {
             case ACTION_GZIP_FILE_SHOW_ALL:
@@ -193,6 +193,8 @@ public class ADDownload {
     //public String getUrl() {return mUrl;}
     public void setListType(int l) {mListType = l;}
     public ArrayList<ADPackageInfo> getListUnsorted() {return mListFed;}
+
+
     public ArrayList<ADPackageInfo> getListFed() {
         if (mListType == ACTION_GZIP_FILE_SHOW_PACKAGE_FED ) {
             mPackageList = this.getFedList();
@@ -203,11 +205,11 @@ public class ADDownload {
             //return mSectionList;
             return mPackageList;
         }
-        else if (false && mListType == ACTION_LIST_SHOW_SECTION_FED ) {
-            mPackageList = this.getFedList();
-        }
+
         return mPackageList;
     }
+
+
     public void setDateOld(long date) {mDateOld = date;}
     //public Date getDateOld() {return  mDateOld;}
     //public ArrayList<ADPackageInfo> getList() {return mList;}
@@ -237,23 +239,23 @@ public class ADDownload {
                     mUrl = mFedXml.parseFindUrl(inputStreamXmlFile(mUrl));
 
                 }
-                System.out.println(mUrl + " -- url");
-                System.out.println(mFedXml.url + " --debug");
+                //System.out.println(mUrl + " -- url");
+                //System.out.println(mFedXml.url + " --debug");
                 String mFedUrl = mFedXml.url;
 
                 ////////////////////////////////////////////
                 mFedXml = new ADDownloadXml(mFedUrl);
 
-                System.out.println(mFedUrl + " test url 1");
+                //System.out.println(mFedUrl + " test url 1");
 
                 mUrl = mFedXml.parseFindPackagelist(inputStreamXmlFile(mFedUrl));
 
                 mUrlFedBase = mFedUrl;
                 mFedUrl = mUrl;
 
-                System.out.println(mFedUrl + " calling fn");
+                //System.out.println(mFedUrl + " calling fn");
                 mFedXml = new ADDownloadXml(mUrlFedBase); // base
-                System.out.println(mFedUrl + " test url 2");
+                //System.out.println(mFedUrl + " test url 2");
 
                 mFedXml.setSearchString(mSearchString);
                 mFedXml.setListType(mListType);
@@ -274,7 +276,7 @@ public class ADDownload {
                     mPackageList = mListFed;
                 }
                 fillPackageListFed();
-                System.out.println("getFedList()");
+                //System.out.println("getFedList()");
                 return mPackageList;
 
             }
@@ -499,7 +501,7 @@ public class ADDownload {
             i++;
         }
         mList = new ArrayList<>();
-        System.out.println("total packages from download " + mPackageList.size());
+        //System.out.println("total packages from download " + mPackageList.size());
     }
 
     private void fillPackageListFed() {
@@ -519,13 +521,13 @@ public class ADDownload {
                 break;
             case ACTION_GZIP_FILE_SHOW_PACKAGE_FED:
             //case ACTION_LIST_UPDATE_PACKAGE_FED:
-                System.out.println("seaarch " + mSearchString);
+                //System.out.println("seaarch " + mSearchString);
                 for (int i = 0; i < mPackageList.size(); i ++ ) {
                     if (mPackageList.get(i).packageSection.trim().contentEquals(mSearchString.trim())) {
                         //ADPackageInfo info = new ADPackageInfo();
 
                         mPackageListOut.add(mPackageList.get(i));
-                        System.out.println(mSearchString);
+                        //System.out.println(mSearchString);
 
                     }
                 }
@@ -556,7 +558,7 @@ public class ADDownload {
 
         }
 
-        System.out.println("length " + mPackageListOut.size());
+        //System.out.println("length " + mPackageListOut.size());
         //mSectionList = (ArrayList<ADPackageInfo>)mPackageListOut.clone();
         mPackageList = mPackageListOut;
     }
@@ -596,7 +598,7 @@ public class ADDownload {
     public void processNew(Context context) {
         mDBList = new ArrayList<>();
 
-        System.out.println("time long " + new Date(mDateOld) + " == " + new Date(mDateDownload));
+        //System.out.println("time long " + new Date(mDateOld) + " == " + new Date(mDateDownload));
 
         if ((mDateOld >= mDateDownload || mDateOld == 0 ) && !mTestingDisable) {
             mToastMessage = "The Package file is already the newest";
@@ -622,7 +624,7 @@ public class ADDownload {
                 }
             }
         }
-        System.out.println("done loop");
+        //System.out.println("done loop");
 
     }
 
