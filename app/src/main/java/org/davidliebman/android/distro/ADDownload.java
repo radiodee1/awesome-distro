@@ -165,8 +165,10 @@ public class ADDownload {
             case ACTION_LIST_SHOW_PACKAGE_FED:
                 break;
             case ACTION_LIST_SHOW_SECTION_FED:
-
-                mListFed = mPackageList;
+                //if(mSectionList != null && mSectionList.size() > 0) mPackageList = mSectionList;
+                mPackageList = getFedList();
+                //mListFed = mPackageList;
+                //System.out.println("constructor "+ mListType);
                 fillPackageListFed();// <------------
                 break;
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
@@ -197,7 +199,12 @@ public class ADDownload {
         }
         else if (mListType == ACTION_LIST_SHOW_SECTION_FED ) {
             //System.out.println("getListFed "+ mListType);
-            return mSectionList;
+            mPackageList = this.getFedList();
+            //return mSectionList;
+            return mPackageList;
+        }
+        else if (false && mListType == ACTION_LIST_SHOW_SECTION_FED ) {
+            mPackageList = this.getFedList();
         }
         return mPackageList;
     }
@@ -523,8 +530,12 @@ public class ADDownload {
                     }
                 }
                 break;
+            case ACTION_LIST_SHOW_SECTION_FED:
+
+                //if (mPackageList.size() == 0) break;
+                mPackageList = mSectionList;
+
             case ACTION_GZIP_FILE_SHOW_SECTION_FED:
-            //case ACTION_LIST_UPDATE_SECTION_FED:
 
                 ArrayList<String> repeats_here = new ArrayList<>();
 
@@ -546,7 +557,7 @@ public class ADDownload {
         }
 
         System.out.println("length " + mPackageListOut.size());
-
+        //mSectionList = (ArrayList<ADPackageInfo>)mPackageListOut.clone();
         mPackageList = mPackageListOut;
     }
 

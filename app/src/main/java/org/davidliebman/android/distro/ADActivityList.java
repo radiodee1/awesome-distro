@@ -306,6 +306,8 @@ public class ADActivityList extends ListActivity
 
         text.setText(getDistroURL());
         date.setText(new Date(mDateDownload).toString());
+
+        System.out.println("show list "+ mListType);
     }
 
     public String getDistroURL() {
