@@ -112,13 +112,13 @@ public class ADActivityList extends ListActivity
                 }
                 else if (mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_FED ||
                         mListType == ADDownload.ACTION_LIST_UPDATE_PACKAGE_FED) {
-                    //mListType = ADDownload.ACTION_LIST_SHOW_SECTION_FED;
-                    mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED;
+                    mListType = ADDownload.ACTION_LIST_SHOW_SECTION_FED;
+                    //mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED;
                     checkUrlForFed();
                     down = new DownloadFilesTask();
                     down.execute(getDistroURL());
                 }
-                
+
                 else {
                     mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
                     checkUrlForFed();
@@ -182,6 +182,7 @@ public class ADActivityList extends ListActivity
                 down.getStatus() == AsyncTask.Status.FINISHED) {
 
             mListType = ADDownload.ACTION_GZIP_FILE_SHOW_PACKAGE_FED;
+            //mListType = ADDownload.ACTION_LIST_SHOW_PACKAGE_FED;
             checkUrlForFed();
             download.setSearchString(selectedItem.packageName);
             mSearchStringFed = selectedItem.packageName;

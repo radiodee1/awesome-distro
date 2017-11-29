@@ -256,11 +256,11 @@ public class ADDownload {
             }
             else if(mListType == ACTION_GZIP_FILE_SHOW_PACKAGE_FED ||
                     mListType == ACTION_LIST_SHOW_PACKAGE_FED ||
-                    mListType == ACTION_LIST_SHOW_SECTION_FED  ||
-                    mListType == ACTION_LIST_UPDATE_SECTION_FED
+                    mListType == ACTION_LIST_SHOW_SECTION_FED  //||
+                    //mListType == ACTION_LIST_UPDATE_SECTION_FED
                     ) {
 
-                if (mSectionList != null && mSectionList.size() > 0){
+                if (mSectionList != null && mSectionList.size() > 0 && false){
                     mPackageList = mSectionList;
                 }
                 else {
