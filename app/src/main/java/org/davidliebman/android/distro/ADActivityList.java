@@ -266,7 +266,7 @@ public class ADActivityList extends ListActivity
                 down = new DownloadFilesTask();
                 down.execute(getDistroURL());
             }
-            else if (false && mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_FED) {
+            else if (true && mListType == ADDownload.ACTION_LIST_UPDATE_SECTION_FED) {
                 mListType = ADDownload.ACTION_LIST_SHOW_SECTION_FED;
                 down = new DownloadFilesTask();
                 down.execute(getDistroURL());
@@ -322,18 +322,18 @@ public class ADActivityList extends ListActivity
 
     @Override
     protected void onDestroy() {
-        //download.onDestroy();
+        if (download != null) download.onDestroy();
         super.onDestroy();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //finish();
+        finish();
         down = null;
-        listValues = new ArrayList<>();
-        mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
-        checkUrlForFed();
+        //listValues = new ArrayList<>();
+        //mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
+        //checkUrlForFed();
     }
 
     @Override
