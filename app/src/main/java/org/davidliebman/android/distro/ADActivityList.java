@@ -329,7 +329,7 @@ public class ADActivityList extends ListActivity
     @Override
     protected void onPause() {
         super.onPause();
-        finish();
+        //finish();
         down = null;
         //listValues = new ArrayList<>();
         //mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
