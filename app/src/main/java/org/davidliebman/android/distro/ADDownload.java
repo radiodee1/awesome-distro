@@ -93,13 +93,15 @@ public class ADDownload {
         String mDateUrl = mUrl;
         if(mUrl.trim().startsWith("baseurl=")) {
             mDateUrl = mUrl.trim().substring("baseurl=".length()) + "repodata/repomd.xml";
+            //downloadDate(mDateUrl);
         }
         if(mUrl.trim().startsWith("metalink=")) {
             mDateUrl = mUrl.trim().substring("metalink=".length());
+            downloadDate(mDateUrl);
         }
 
         if (true || mDateUrl.contentEquals(mUrl)) {
-            downloadDate(mDateUrl);
+            //downloadDate(mDateUrl);
         }
         //System.out.println("date from download " + new Date(mDateDownload));
 
@@ -469,7 +471,13 @@ public class ADDownload {
             HttpURLConnection connection = (HttpURLConnection) distro.openConnection();
             mDateDownload = connection.getLastModified();
             connection.disconnect();
-            //mDateNew = new Date(mDateDownload);
+            //Date mDateNew = new Date(mDateDownload);
+            //System.out.println(mDateNew + " " + mDateDownload);
+            if (mDateDownload == 0) {
+                mDateDownload = System.currentTimeMillis();
+                //mDateNew = new Date(mDateDownload);
+                //System.out.println(mDateNew);
+            }
 
         }
         catch (Exception e) {

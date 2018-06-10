@@ -510,7 +510,9 @@ public class ADActivityList extends ListActivity
         protected Void doInBackground(String... params) {
             //System.out.println(params[0]);
             int num = 0;
-
+            if (download == null) {
+                download = new ADDownload(params[0], mDateOld, mListType);
+            }
             switch (mListType) {
                 case ADDownload.ACTION_TEXT_FILE_SHOW_ALL:
                     download = new ADDownload(params[0], mDateOld, mListType);
