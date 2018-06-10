@@ -3,6 +3,7 @@ package org.davidliebman.android.distro;
 import android.app.DialogFragment;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -13,16 +14,20 @@ import java.util.Date;
 import java.util.List;
 
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.MenuInflater;
 
 public class ADActivityList extends ListActivity
-        implements ADDialogQuestion.ADDialogQuestionInterface {
+        implements ADDialogQuestion.ADDialogQuestionInterface, SearchView.OnQueryTextListener {
 
     private boolean mDebug = true;
     private long mDateOld = 0;
@@ -39,6 +44,8 @@ public class ADActivityList extends ListActivity
     private boolean bool_del_db;
     private String string_url = "";
     private String mSearchStringFed = "";
+    private SearchView searchView ;
+    private MenuItem searchMenuItem;
 
     private int mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
 
@@ -281,6 +288,24 @@ public class ADActivityList extends ListActivity
         return true; //super.onKeyDown(keycode, event);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.search_menu, menu);
+
+        SearchManager searchManager = (SearchManager)
+                getSystemService(Context.SEARCH_SERVICE);
+        searchMenuItem = menu.findItem(R.id.search);
+        searchView = (SearchView) searchMenuItem.getActionView();
+
+        searchView.setSearchableInfo(searchManager.
+                getSearchableInfo(getComponentName()));
+        searchView.setSubmitButtonEnabled(true);
+        searchView.setOnQueryTextListener(this);
+
+        return true;
+    }
+
     public void showDialog() {
         ADDialogQuestion dialog = new ADDialogQuestion();
         dialog.show(getFragmentManager(), "button_check");
@@ -430,6 +455,16 @@ public class ADActivityList extends ListActivity
         mDateOld = sharedPref.getLong(PREFERENCES_DATE_OLD_KEY, 0);
         string_url = sharedPref.getString(PREFERENCES_URL_KEY, "");
         //System.out.println("date from preferences " + new Date(mDateOld));
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        return false;
     }
 
     ////////////////////////////////////////

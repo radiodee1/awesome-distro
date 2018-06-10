@@ -16,11 +16,19 @@
             android:name=".ADActivityList"
             android:configChanges="orientation"
             android:screenOrientation="portrait"
-            >
+            android:windowSoftInputMode="stateHidden"
+            android:launchMode="singleTask"
+            android:theme="@android:style/Theme.Holo.Light.DarkActionBar"
+        >
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable">
+            </meta-data>
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.SEARCH" />
             </intent-filter>
         </activity>
         <activity
