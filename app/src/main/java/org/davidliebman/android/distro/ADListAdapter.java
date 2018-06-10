@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,10 +18,12 @@ import java.util.HashMap;
  * Created by dave on 4/30/17.
  */
 
-public class ADListAdapter extends BaseAdapter {
+public class ADListAdapter extends BaseAdapter implements Filterable {
 
     private Activity activity;
     private ArrayList<ADPackageInfo> data;
+    private ArrayList<ADPackageInfo> completeData;
+    private Filter mFilter;
 
     private static LayoutInflater inflater=null;
     //public ImageLoader imageLoader;
@@ -60,7 +64,12 @@ public class ADListAdapter extends BaseAdapter {
         return 0;
     }
 
-
+    public void resetCompleteData() {
+        if (completeData != null) {
+            data = completeData;
+            notifyDataSetChanged();
+        }
+    }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -95,5 +104,53 @@ public class ADListAdapter extends BaseAdapter {
 
         return vi;
 
+    }
+
+    @Override
+    public Filter getFilter() {
+        if(mFilter == null){
+            mFilter = new InfoFilter();
+        }
+        return mFilter;
+    }
+
+    /////////////////////////////
+
+    private class InfoFilter extends Filter {
+
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            FilterResults filterResults = new FilterResults();
+            if (constraint!=null && constraint.length()>0) {
+                ArrayList<ADPackageInfo> tempList = new ArrayList<ADPackageInfo>();
+
+                // search content in package list
+                for (ADPackageInfo user : data) {
+                    if (user.packageName.toLowerCase().contains(constraint.toString().toLowerCase())) {
+                        tempList.add(user);
+                    }
+                }
+                completeData = data;
+                filterResults.count = tempList.size();
+                filterResults.values = tempList;
+            } else {
+                filterResults.count = data.size();
+                filterResults.values = data;
+            }
+
+            return filterResults;
+        }
+
+        /**
+         * Notify about filtered list to ui
+         * @param constraint text
+         * @param results filtered result
+         */
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            data = (ArrayList<ADPackageInfo>) results.values;
+            notifyDataSetChanged();
+        }
     }
 }

@@ -46,6 +46,7 @@ public class ADActivityList extends ListActivity
     private String mSearchStringFed = "";
     private SearchView searchView ;
     private MenuItem searchMenuItem;
+    private boolean mIsSearching = false;
 
     private int mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
 
@@ -98,6 +99,11 @@ public class ADActivityList extends ListActivity
         browseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (mIsSearching) {
+                    myAdapter.resetCompleteData();
+                    mIsSearching = false;
+                    return;
+                }
                 if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB && download == null) {
                     mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
                     checkUrlForFed();
@@ -464,7 +470,9 @@ public class ADActivityList extends ListActivity
 
     @Override
     public boolean onQueryTextChange(String s) {
-        return false;
+        myAdapter.getFilter().filter(s);
+        mIsSearching = true;
+        return true;
     }
 
     ////////////////////////////////////////
