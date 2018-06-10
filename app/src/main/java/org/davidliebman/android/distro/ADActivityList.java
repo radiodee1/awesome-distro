@@ -102,7 +102,7 @@ public class ADActivityList extends ListActivity
                 if (mIsSearching) {
                     myAdapter.resetCompleteData();
                     mIsSearching = false;
-                    return;
+                    //return;
                 }
                 if (mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB && download == null) {
                     mListType = ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_DEB;
@@ -185,8 +185,14 @@ public class ADActivityList extends ListActivity
     @Override
     protected void onListItemClick(ListView list, View view, int position, long id) {
         super.onListItemClick(list, view, position, id);
+        ADPackageInfo selectedItem = null;
 
-        ADPackageInfo selectedItem = listValues.get(position);
+        if (mIsSearching == false) {
+            selectedItem = listValues.get(position);
+        }
+        else {
+            selectedItem = myAdapter.getList().get(position);
+        }
 
         //text.setText("You clicked " + selectedItem.packageName + " at position " + position);
         if ((mListType == ADDownload.ACTION_GZIP_FILE_SHOW_SECTION_FED ||

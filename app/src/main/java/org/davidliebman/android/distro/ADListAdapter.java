@@ -71,6 +71,8 @@ public class ADListAdapter extends BaseAdapter implements Filterable {
         }
     }
 
+    public ArrayList<ADPackageInfo> getList() {return data;}
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
